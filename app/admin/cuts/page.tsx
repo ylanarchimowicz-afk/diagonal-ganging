@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Pencil, RotateCcw, Upload } from "lucide-react";
 
-type SheetSize = { length: number; width: number; preferred?: boolean };
+// FIX: Se agrega la propiedad opcional `_edit` al tipo SheetSize
+type SheetSize = { length: number; width: number; preferred?: boolean; _edit?: boolean; };
 type CutGroup = { forPaperSize: { length: number; width: number }, sheetSizes: SheetSize[], _edit?: boolean, _snapshot?: CutGroup };
 
 const toNum = (s:string)=>{ const n = Number(s); return Number.isFinite(n) ? n : 0; };
@@ -54,7 +55,7 @@ export default function CutsAdmin(){
 
   function addRow(i:number){
     const g = groups[i];
-    mut(i,{sheetSizes:[{length:g.forPaperSize.length,width:g.forPaperSize.width,preferred:false}, ...(g.sheetSizes||[])]});
+    mut(i,{sheetSizes:[{length:g.forPaperSize.length,width:g.forPaperSize.width,preferred:false, _edit: true}, ...(g.sheetSizes||[])]});
   }
   function delRow(i:number, ri:number){
     const g = groups[i];
