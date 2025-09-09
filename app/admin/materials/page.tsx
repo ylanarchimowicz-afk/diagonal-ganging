@@ -1,20 +1,20 @@
-﻿/* app/admin/materials/page.tsx  UI en tarjetas: Tipo  Gramaje  Tamaños */
+﻿/* app/admin/materials/page.tsx  Tipo  Gramajes (chips)  Tamaños (4 inputs) con duplicar */
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Upload, RotateCcw, Pencil } from "lucide-react";
+import { Plus, Trash2, Upload, RotateCcw, Pencil, Copy } from "lucide-react";
 
 type SizeRow = { length_mm: number; width_mm: number; provider?: string; cost_per_ton_usd?: number };
-type WeightCard = { gsm: number; sizes: SizeRow[]; _edit?: boolean; _snapshot?: WeightCard };
+type WeightCard = { gsms: number[]; sizes: SizeRow[]; _edit?: boolean; _snapshot?: WeightCard };
 type MaterialType = { name: string; weights: WeightCard[]; _edit?: boolean; _snapshot?: MaterialType };
 
 const toNum = (s:string)=>{ const n=Number(s); return Number.isFinite(n)?n:0; };
+const uniq = (a:number[]) => Array.from(new Set(a.filter(n=>Number.isFinite(n)))).sort((x,y)=>x-y);
 
 export default function MaterialsAdmin(){
   const [items, setItems] = useState<MaterialType[]>([]);
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // Carga inicial desde API si existe; si no, quedamos en blanco
   useEffect(()=>{ (async()=>{
     try{
       const r = await fetch("/api/admin/materials",{cache:"no-store"});
@@ -25,13 +25,13 @@ export default function MaterialsAdmin(){
   })(); },[]);
 
   function normalizeIn(raw:any[]):MaterialType[] {
-    // Acepta formato agrupado (ya correcto) o flat {name,gsm,length_mm,width_mm,provider,cost_per_ton_usd}
     const isGrouped = (o:any)=> Array.isArray(o?.weights);
     if(raw.every(isGrouped)) {
+      // Acepta pesos como "gsm" (numero) o "gsms" (array)
       return raw.map((t:any)=>({
         name: String(t.name||""),
         weights: (t.weights||[]).map((w:any)=>({
-          gsm: Number(w.gsm||0),
+          gsms: Array.isArray(w.gsms) ? uniq(w.gsms) : uniq([Number(w.gsm||0)]),
           sizes: (w.sizes||[]).map((s:any)=>({
             length_mm: Number(s.length_mm||0),
             width_mm: Number(s.width_mm||0),
@@ -43,7 +43,7 @@ export default function MaterialsAdmin(){
         _edit:false
       }));
     }
-    // Agrupar flat
+    // Formato plano  agrupo por name y gsm; cada gsm queda como card con gsms:[gsm]
     const map = new Map<string, Map<number, SizeRow[]>>();
     for(const r of raw){
       const name = String(r.name||"");
@@ -63,7 +63,7 @@ export default function MaterialsAdmin(){
     for(const [name, m] of map.entries()){
       const weights:WeightCard[]=[];
       for(const [gsm, sizes] of m.entries()){
-        weights.push({ gsm, sizes, _edit:false });
+        weights.push({ gsms:[gsm], sizes, _edit:false });
       }
       out.push({ name, weights, _edit:false });
     }
@@ -72,7 +72,7 @@ export default function MaterialsAdmin(){
 
   function setDirtyItems(next:MaterialType[]){ setItems(next); setDirty(true); }
 
-  // Acciones de tipo
+  // Tipo
   function addType(){ setDirtyItems([{ name:"Nuevo tipo", weights:[], _edit:true }, ...items]); }
   function startEditType(i:number){ setDirtyItems(items.map((t,ix)=> ix===i?({...t,_edit:true,_snapshot:structuredClone(t)}):t)); }
   function cancelEditType(i:number){ setDirtyItems(items.map((t,ix)=> ix===i?(t._snapshot?({...t._snapshot,_edit:false,_snapshot:undefined}):({...t,_edit:false})):t)); }
@@ -80,15 +80,39 @@ export default function MaterialsAdmin(){
   function delType(i:number){ if(!confirm("¿Eliminar tipo de papel?"))return; setDirtyItems(items.filter((_,ix)=>ix!==i)); }
   function mutType(i:number, patch:Partial<MaterialType>){ setDirtyItems(items.map((t,ix)=> ix===i?({...t,...patch}):t)); }
 
-  // Acciones de gramaje
-  function addWeight(i:number){ const t=items[i]; mutType(i,{weights:[{gsm:0,sizes:[],_edit:true},...(t.weights||[])]}); }
+  // Gramaje (card)
+  function addWeight(i:number){ const t=items[i]; mutType(i,{weights:[{gsms:[0],sizes:[],_edit:true},...(t.weights||[])]}); }
   function startEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,_edit:true,_snapshot:structuredClone(w)}):w); mutType(i,{weights:next}); }
   function cancelEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?(w._snapshot?({...w._snapshot,_edit:false,_snapshot:undefined}):({...w,_edit:false})):w); mutType(i,{weights:next}); }
-  function saveEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,_edit:false,_snapshot:undefined}):w); mutType(i,{weights:next}); }
+  function saveEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,gsms:uniq(w.gsms),_edit:false,_snapshot:undefined}):w); mutType(i,{weights:next}); }
   function delWeight(i:number, wi:number){ if(!confirm("¿Eliminar gramaje?"))return; const t=items[i]; mutType(i,{weights:(t.weights||[]).filter((_,wx)=>wx!==wi)}); }
   function mutWeight(i:number, wi:number, patch:Partial<WeightCard>){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,...patch}):w); mutType(i,{weights:next}); }
 
-  // Acciones de tamaño
+  // Chips de gsm
+  function addGsmChip(i:number, wi:number){
+    const val = prompt("Nuevo gramaje (g/m):","");
+    if(val===null) return;
+    const n = toNum(val);
+    if(!n){ alert("Valor inválido."); return; }
+    const t=items[i]; const w=t.weights[wi];
+    mutWeight(i,wi,{gsms: uniq([...(w.gsms||[]), n])});
+  }
+  function removeGsmChip(i:number, wi:number, gsm:number){
+    const t=items[i]; const w=t.weights[wi];
+    const filtered = (w.gsms||[]).filter(x=>x!==gsm);
+    if(filtered.length===0){ alert("Debe quedar al menos un gramaje."); return; }
+    mutWeight(i,wi,{gsms: filtered});
+  }
+  function duplicateWeight(i:number, wi:number){
+    const val = prompt("Duplicar: nuevo gramaje (g/m):","");
+    if(val===null) return;
+    const gsm = toNum(val); if(!gsm){ alert("Valor inválido."); return; }
+    const t=items[i]; const w=t.weights[wi];
+    const clone: WeightCard = { gsms:[gsm], sizes: structuredClone(w.sizes), _edit:true };
+    mutType(i,{weights:[clone, ...t.weights]});
+  }
+
+  // Tamaños
   function addSize(i:number, wi:number){ const t=items[i]; const w=t.weights[wi]; mutWeight(i,wi,{sizes:[{length_mm:0,width_mm:0,provider:"",cost_per_ton_usd:undefined},...(w.sizes||[])]}); }
   function delSize(i:number, wi:number, si:number){ const t=items[i]; const w=t.weights[wi]; mutWeight(i,wi,{sizes:(w.sizes||[]).filter((_,sx)=>sx!==si)}); }
   function mutSize(i:number, wi:number, si:number, patch:Partial<SizeRow>){
@@ -97,7 +121,7 @@ export default function MaterialsAdmin(){
     mutWeight(i,wi,{sizes:list});
   }
 
-  // Guardar / Exportar / Importar
+  // Guardar / Exportar / Importar (exporta gsms; compat: si alguien espera gsm, toma el primero)
   async function onSaveAll(){
     setMsg("Guardando");
     try{
@@ -147,7 +171,6 @@ export default function MaterialsAdmin(){
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      {/* TIPOS (tarjetas madre) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((t,i)=>(
           <div key={i} className="rounded-xl border border-white/15 bg-black/40 p-4">
@@ -176,12 +199,23 @@ export default function MaterialsAdmin(){
               <div className="space-y-3">
                 {(t.weights||[]).map((w,wi)=>(
                   <div key={wi} className="rounded-lg border border-white/15 bg-black/30 p-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      {/* Chips de gsms */}
+                      <div className="flex flex-wrap gap-2">
+                        {(w.gsms||[]).map(gsm=>(
+                          <span key={gsm} className="chip">
+                            {gsm} g
+                            {w._edit && <button className="chip-x" onClick={()=>removeGsmChip(i,wi,gsm)}></button>}
+                          </span>
+                        ))}
+                        {w._edit && <button className="btn-ghost" onClick={()=>addGsmChip(i,wi)}><Plus size={14}/> Añadir g</button>}
+                      </div>
+
                       {!w._edit
-                        ? <div className="font-medium">{w.gsm} g</div>
-                        : <div className="flex items-center gap-2"><span className="text-sm text-white/70">Gramaje</span><input className="inp w-28" type="number" value={w.gsm} onChange={e=>mutWeight(i,wi,{gsm:toNum(e.target.value)})}/><span>g</span></div>}
-                      {!w._edit
-                        ? <button className="btn-ghost" title="Editar gramaje" onClick={()=>startEditWeight(i,wi)}><Pencil size={14}/></button>
+                        ? <div className="flex gap-2">
+                            <button className="btn-ghost" title="Duplicar" onClick={()=>duplicateWeight(i,wi)}><Copy size={14}/></button>
+                            <button className="btn-ghost" title="Editar gramaje" onClick={()=>startEditWeight(i,wi)}><Pencil size={14}/></button>
+                          </div>
                         : <div className="flex gap-2">
                             <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEditWeight(i,wi)}><RotateCcw size={14}/></button>
                             <button className="btn-ok" title="Guardar" onClick={()=>saveEditWeight(i,wi)}><Upload size={14}/></button>
@@ -207,12 +241,13 @@ export default function MaterialsAdmin(){
                                 <div></div>
                               </div>
                             ) : (
-                              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 items-center">
-                                <input className="inp" type="number" value={s.length_mm} onChange={e=>mutSize(i,wi,si,{length_mm:toNum(e.target.value)})} placeholder="L"/>
-                                <input className="inp" type="number" value={s.width_mm}  onChange={e=>mutSize(i,wi,si,{width_mm:toNum(e.target.value)})}  placeholder="W"/>
-                                <input className="inp" value={s.provider||""} onChange={e=>mutSize(i,wi,si,{provider:e.target.value})} placeholder="Proveedor"/>
-                                <div className="flex items-center gap-2"><span className="text-xs">USD/Ton</span><input className="inp w-28" type="number" value={s.cost_per_ton_usd ?? ""} onChange={e=>mutSize(i,wi,si,{cost_per_ton_usd:toNum(e.target.value)})}/></div>
-                                <div className="flex justify-end"><button className="btn-danger" onClick={()=>delSize(i,wi,si)}><Trash2 size={14}/></button></div>
+                              // 4 inputs  1/4 cada uno + borrar al final
+                              <div className="grid grid-cols-9 gap-2 items-center">
+                                <input className="inp col-span-2" type="number" placeholder="Ancho (mm)" value={s.length_mm} onChange={e=>mutSize(i,wi,si,{length_mm:toNum(e.target.value)})}/>
+                                <input className="inp col-span-2" type="number" placeholder="Largo (mm)" value={s.width_mm}  onChange={e=>mutSize(i,wi,si,{width_mm:toNum(e.target.value)})}/>
+                                <input className="inp col-span-3" placeholder="Proveedor" value={s.provider||""} onChange={e=>mutSize(i,wi,si,{provider:e.target.value})}/>
+                                <input className="inp col-span-1" type="number" placeholder="USD/Ton" value={s.cost_per_ton_usd ?? ""} onChange={e=>mutSize(i,wi,si,{cost_per_ton_usd:toNum(e.target.value)})}/>
+                                <div className="col-span-1 flex justify-end"><button className="btn-danger" onClick={()=>delSize(i,wi,si)}><Trash2 size={14}/></button></div>
                               </div>
                             )}
                           </div>
@@ -234,6 +269,8 @@ export default function MaterialsAdmin(){
         .btn-ghost{padding:.35rem .5rem;border:1px solid rgba(255,255,255,.35);border-radius:.55rem;background:transparent;}
         .btn-danger{padding:.35rem .5rem;border:1px solid #dc2626;background:#fee2e2;color:#991b1b;border-radius:.55rem;}
         .btn-ok{padding:.35rem .5rem;border:1px solid #16a34a;background:#dcfce7;color:#14532d;border-radius:.55rem;}
+        .chip{background:#e5e7eb;color:#111;border-radius:9999px;padding:.15rem .6rem;display:inline-flex;align-items:center;gap:.35rem;font-weight:600}
+        .chip-x{background:transparent;border:none;color:#6b7280;font-size:14px;line-height:1}
       `}</style>
     </div>
   );
