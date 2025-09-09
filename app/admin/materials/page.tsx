@@ -234,7 +234,7 @@ export default function MaterialsAdmin(){
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Materiales</h1>
-        <input type="file" accept="application/json" onChange={handleImport} /> gramaje -> tamaños; usdPerTon tomado de priceIndex).
+        <input type="file" accept="application/json" onChange={handleImport} />
     // @ts-ignore
     setItems(items);
     // @ts-ignore
@@ -324,6 +324,7 @@ export default function MaterialsAdmin(){
 }
 
 /* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
+
 
 
 
