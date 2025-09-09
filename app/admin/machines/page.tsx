@@ -5,20 +5,20 @@ import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
 
 type Bracket = {
   constraints: { maxLen: number; maxWid: number };
-  sheetCost: { unit: "per_sheet" | "per_thousand"; value: number; currency?: string };
+  sheetCost: { unit: "per_sheet" | "per_thousand"; value: number | null; currency?: string };
 };
 
 type Machine = {
   id?: string;
   name: string;
   is_offset?: boolean;
-  max_len_mm?: number | null;  // ancho (entrada)
-  max_wid_mm?: number | null;  // largo
-  mech_clamp_mm?: number | null; // pinza
-  mech_tail_mm?: number | null;  // cola
-  mech_sides_mm?: number | null; // márgenes
-  base_setup_uyu?: number | null; // postura
-  base_wash_uyu?: number | null;  // lavado
+  max_len_mm?: number | null;
+  max_wid_mm?: number | null;
+  mech_clamp_mm?: number | null;
+  mech_tail_mm?: number | null;
+  mech_sides_mm?: number | null;
+  base_setup_uyu?: number | null;
+  base_wash_uyu?: number | null;
   base_setup_usd?: number | null;
   base_wash_usd?: number | null;
   price_brackets?: Bracket[];
@@ -98,6 +98,16 @@ export default function MachinesAdmin() {
     URL.createObjectURL(new Blob([JSON.stringify({ machines: items.map(({ _edit, _snapshot, ...r }) => r) }, null, 2)], { type: "application/json" })),
     [items]
   );
+  
+  const LabeledInput = ({label, sublabel, children} : {label: string, sublabel?: string, children: React.ReactNode}) => (
+    <label className="grid gap-1 text-sm">
+      <div className="flex justify-between items-baseline">
+        <span className="text-white/80 font-medium">{label}</span>
+        {sublabel && <span className="text-xs text-white/50">{sublabel}</span>}
+      </div>
+      {children}
+    </label>
+  );
 
   return (
     <div className="space-y-5">
@@ -114,176 +124,117 @@ export default function MachinesAdmin() {
           } catch { alert("JSON inválido"); }
           e.currentTarget.value = "";
         }} />
-        <button className="px-3 py-2 rounded bg-white text-black" onClick={addMachine}>Agregar</button>
-        <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
+        <button className="px-3 py-2 rounded bg-white text-black font-semibold" onClick={addMachine}>Agregar</button>
+        <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50 font-semibold" onClick={saveAll} disabled={!dirty}>Guardar Cambios</button>
         <a href={exportHref} download="machines.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
         {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      <p className="text-white/60 text-xs">Nota: la <b>primera medida</b> es la de <b>entrada a máquina</b>.</p>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((m, i) => (
-          <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4">
+          <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4 flex flex-col gap-4">
             <div className="flex items-center justify-between gap-2">
               <input
-                className="inp w-full text-lg font-semibold min-w-0"
+                className="inp text-lg font-semibold w-full bg-transparent border-none p-0 disabled:text-white"
                 value={m.name} onChange={e => mut(i, { name: e.target.value })}
                 placeholder="Nombre de la máquina" disabled={!m._edit}
               />
-              {!m._edit ? (
-                <div className="flex gap-2">
-                  <button className="btn-ghost" title="Editar" onClick={() => startEdit(i)}><Pencil size={18} /></button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <button className="btn-ghost" title="Cancelar" onClick={() => cancelEdit(i)}><RotateCcw size={18} /></button>
-                  <button className="btn-ok" title="Guardar" onClick={() => saveEdit(i)}><Upload size={18} /></button>
-                  <button className="btn-danger" title="Eliminar" onClick={() => deleteMachine(m.id, i)}><Trash2 size={18} /></button>
-                </div>
-              )}
+              <div className="flex gap-2 items-center">
+                {!m._edit ? (
+                    <button className="btn-ghost" title="Editar" onClick={() => startEdit(i)}><Pencil size={18} /></button>
+                ) : (
+                  <>
+                    <button className="btn-ghost" title="Cancelar" onClick={() => cancelEdit(i)}><RotateCcw size={18} /></button>
+                    <button className="btn-ok" title="Guardar" onClick={() => saveEdit(i)}><Upload size={18} /></button>
+                    <button className="btn-danger" title="Eliminar" onClick={() => deleteMachine(m.id, i)}><Trash2 size={18} /></button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <label className="grid gap-1 text-sm">
-                  <span className="text-white/80">Tipo</span>
-                  <select
-                    className="inp"
-                    value={m.is_offset ? "offset" : "digital"}
-                    onChange={e => mut(i, { is_offset: e.target.value === "offset" })}
-                    disabled={!m._edit}
-                  >
-                    <option value="digital">Digital</option>
-                    <option value="offset">Offset</option>
-                  </select>
-                </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+              <LabeledInput label="Tipo">
+                <select className="inp w-full" value={m.is_offset ? "offset" : "digital"} onChange={e => mut(i, { is_offset: e.target.value === "offset" })} disabled={!m._edit}>
+                  <option value="digital">Digital</option>
+                  <option value="offset">Offset</option>
+                </select>
+              </LabeledInput>
+              
+              <div/> 
 
-                <div>
-                  <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Tamaño máximo de papel</span>
-                    <div className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-6 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a máquina)</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                      <div className="col-span-6 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Largo</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={m.max_wid_mm ?? ""} onChange={e => mut(i, { max_wid_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                    </div>
-                  </label>
+              <LabeledInput label="Tamaño máximo de papel" sublabel="Ancho (entrada) × Largo">
+                <div className="flex items-center gap-2">
+                  <input type="number" className="inp w-full" value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
+                   <span className="text-white/50">×</span>
+                  <input type="number" className="inp w-full" value={m.max_wid_mm ?? ""} onChange={e => mut(i, { max_wid_mm: toNum(e.target.value) })} disabled={!m._edit} />
                 </div>
+              </LabeledInput>
 
-                <div>
-                  <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Costos de preparación (UYU)</span>
-                    <div className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-6 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Postura</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={(m.base_setup_uyu ?? m.base_setup_usd) ?? ""} onChange={e => mut(i, { base_setup_uyu: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                      <div className="col-span-6 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Lavado</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={(m.base_wash_uyu ?? m.base_wash_usd) ?? ""} onChange={e => mut(i, { base_wash_uyu: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                    </div>
-                  </label>
-                </div>
+              <LabeledInput label="Costos de preparación" sublabel="Postura / Lavado (UYU)">
+                 <div className="flex items-center gap-2">
+                    <input type="number" className="inp w-full" value={(m.base_setup_uyu ?? m.base_setup_usd) ?? ""} onChange={e => mut(i, { base_setup_uyu: toNum(e.target.value) })} disabled={!m._edit} />
+                    <input type="number" className="inp w-full" value={(m.base_wash_uyu ?? m.base_wash_usd) ?? ""} onChange={e => mut(i, { base_wash_uyu: toNum(e.target.value) })} disabled={!m._edit} />
+                  </div>
+              </LabeledInput>
 
-                <div>
-                  <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Márgenes (mm)</span>
-                    <div className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-4 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Pinza</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={m.mech_clamp_mm ?? ""} onChange={e => mut(i, { mech_clamp_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                      <div className="col-span-4 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Cola</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                      <div className="col-span-4 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Márgenes</span>
-                        <input type="number" className="inp w-full min-w-0"
-                          value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                      </div>
-                    </div>
-                  </label>
+              <LabeledInput label="Márgenes" sublabel="Pinza / Cola / Costados (mm)">
+                <div className="flex items-center gap-2">
+                  <input type="number" className="inp w-full" value={m.mech_clamp_mm ?? ""} onChange={e => mut(i, { mech_clamp_mm: toNum(e.target.value) })} disabled={!m._edit} />
+                  <input type="number" className="inp w-full" value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
+                  <input type="number" className="inp w-full" value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
                 </div>
+              </LabeledInput>
+            </div>
+
+            <div className="space-y-2 border-t border-white/10 pt-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm text-white/80 font-semibold">Costos por formato</h3>
+                {m._edit && (
+                  <button className="btn-ok flex items-center gap-1" onClick={() => {
+                    const curr = m.price_brackets ?? [];
+                    const next: Bracket = { constraints: { maxLen: 0, maxWid: 0 }, sheetCost: { unit: "per_sheet", value: 0, currency: "UYU" } };
+                    mut(i, { price_brackets: [next, ...curr] });
+                  }}><Plus size={16}/> Tramo</button>
+                )}
               </div>
 
+              {(m.price_brackets ?? []).length === 0 && <div className="text-xs text-white/60">Sin tramos</div>}
+
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/80 font-semibold">Costos por formato</span>
-                  {m._edit && (
-                    <button
-                      className="btn-ok flex items-center gap-1"
-                      onClick={() => {
-                        const curr = m.price_brackets ?? [];
-                        const next: Bracket = { constraints: { maxLen: 0, maxWid: 0 }, sheetCost: { unit: "per_sheet", value: 0, currency: "UYU" } };
-                        mut(i, { price_brackets: [next, ...curr] });
-                      }}
-                    ><Plus size={16}/> Tramo</button>
-                  )}
-                </div>
-
-                {(m.price_brackets ?? []).length === 0 && <div className="text-xs text-white/60">Sin tramos</div>}
-
-                <div className="space-y-2">
-                  {(m.price_brackets ?? []).map((b, bi) => (
-                    <div key={bi} className="rounded-lg border border-black/60 bg-white text-black p-2">
-                      {!m._edit ? (
-                        <div className="text-sm truncate">
-                          {(b.constraints?.maxLen ?? "-")}×{(b.constraints?.maxWid ?? "-")} mm — ${b.sheetCost?.value ?? "-"} {b.sheetCost?.unit === "per_sheet" ? "por hoja" : "por millar"}
+                {(m.price_brackets ?? []).map((b, bi) => (
+                  <div key={bi} className={`rounded-lg p-2 ${m._edit ? 'bg-black/20 border border-white/10' : 'bg-white/5'}`}>
+                    {!m._edit ? (
+                      <div className="text-sm font-medium text-white/90">
+                        {b.constraints?.maxLen ?? "-"}×{b.constraints?.maxWid ?? "-"} mm — ${b.sheetCost?.value ?? "-"} {b.sheetCost?.unit === "per_sheet" ? "por hoja" : "por millar"}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <LabeledInput label="Ancho (entrada) × Largo">
+                            <div className="flex items-center gap-2">
+                                <input className="inp w-full" type="number" value={b.constraints?.maxLen ?? ""} onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxWid: 0 }), maxLen: Number(e.target.value || 0) } })} />
+                                <span className="text-white/50">×</span>
+                                <input className="inp w-full" type="number" value={b.constraints?.maxWid ?? ""} onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxLen: 0 }), maxWid: Number(e.target.value || 0) } })} />
+                            </div>
+                          </LabeledInput>
+                          <LabeledInput label="Unidad y Precio">
+                            <div className="flex items-center gap-2">
+                               <select className="inp w-full" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { value: 0 }), unit: e.target.value as any } })}>
+                                  <option value="per_sheet">por hoja</option>
+                                  <option value="per_thousand">por millar</option>
+                               </select>
+                               <input className="inp w-full" type="number" value={b.sheetCost?.value ?? ""} onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { unit: "per_sheet" }), value: toNum(e.target.value) } })} />
+                            </div>
+                          </LabeledInput>
                         </div>
-                      ) : (
-                        <>
-                          <div className="grid grid-cols-2 gap-2">
-                            <label className="grid gap-1 text-xs min-w-0">
-                              <span>Ancho (entrada)</span>
-                              <input className="inp w-full min-w-0"
-                                     type="number" value={b.constraints?.maxLen ?? ""}
-                                     onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxWid: 0 }), maxLen: Number(e.target.value || 0) } })} />
-                            </label>
-                            <label className="grid gap-1 text-xs min-w-0">
-                              <span>Largo</span>
-                              <input className="inp w-full min-w-0"
-                                     type="number" value={b.constraints?.maxWid ?? ""}
-                                     onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxLen: 0 }), maxWid: Number(e.target.value || 0) } })} />
-                            </label>
-                            <label className="grid gap-1 text-xs min-w-0">
-                              <span>Unidad</span>
-                              <select className="inp w-full min-w-0"
-                                      value={b.sheetCost?.unit ?? "per_sheet"}
-                                      onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { value: 0 }), unit: e.target.value as any } })}>
-                                <option value="per_sheet">por hoja</option>
-                                <option value="per_thousand">por millar</option>
-                              </select>
-                            </label>
-                            <label className="grid gap-1 text-xs min-w-0">
-                              <span>Precio</span>
-                              <input className="inp w-full min-w-0"
-                                     type="number" inputMode="decimal" step="0.1"
-                                     value={b.sheetCost?.value ?? ""}
-                                     onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { unit: "per_sheet" }), value: Number(e.target.value || 0) } })} />
-                            </label>
-                          </div>
-                          <div className="flex justify-end mt-2">
-                            <button className="btn-danger" onClick={() => removeBracket(i, bi)}><Trash2 size={16}/></button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                        <div className="flex justify-end mt-2">
+                          <button className="btn-danger" onClick={() => removeBracket(i, bi)}><Trash2 size={16}/></button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

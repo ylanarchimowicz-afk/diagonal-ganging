@@ -7,24 +7,10 @@ type SizeRow = { length_mm: number; width_mm: number; supplier?: string; usd_per
 type Grade = { grams: number[]; sizes: SizeRow[]; };
 type MaterialType = { id?: string; name: string; grades: Grade[]; _edit?: boolean; _snapshot?: MaterialType; };
 
-// Tipo para el JSON externo que importas
-type ExternalMaterialRow = {
-    name?: string;
-    paperWeight?: number;
-    priceIndex?: number | null;
-    materialSizes?: {
-        factorySize?: {
-            len?: number;
-            wid?: number;
-        };
-        stocked?: boolean;
-    }[];
-};
-
 const toNum = (s:string)=>{ const n = Number(s); return Number.isFinite(n) ? n : null; };
 
 // Helper para agrupar gramajes con tamaños idénticos
-function groupEquivalentGrades(grades: {grams: number[], sizes: SizeRow[]}[]): Grade[] {
+function groupEquivalentGrades(grades: any[]): Grade[] {
   const bySignature: Record<string, number[]> = {};
   const sizesBySignature: Record<string, SizeRow[]> = {};
   const keyForSizes = (sizes: SizeRow[]) => (sizes||[]).map(s => `${s.length_mm}x${s.width_mm}:${s.supplier}:${s.usd_per_ton}`).sort().join('|');
@@ -33,7 +19,8 @@ function groupEquivalentGrades(grades: {grams: number[], sizes: SizeRow[]}[]): G
     const sig = keyForSizes(g.sizes || []);
     if (!bySignature[sig]) bySignature[sig] = [];
     if (!sizesBySignature[sig]) sizesBySignature[sig] = g.sizes || [];
-    bySignature[sig].push(...(Array.isArray(g.grams) ? g.grams : [g.grams as number]));
+    const gramsToAdd = Array.isArray(g.grams) ? g.grams : [Number(g.grams)].filter(n => n > 0);
+    bySignature[sig].push(...gramsToAdd);
   });
 
   return Object.keys(bySignature).map(sig => ({
@@ -78,20 +65,26 @@ export default function MaterialsAdmin(){
   function delType(i:number){ if(!confirm("¿Eliminar este tipo de material?")) return; setItems(p=>p.filter((_,ix)=>ix!==i)); setDirty(true); }
   function startEditType(i:number){ mut(i,{_edit:true,_snapshot:structuredClone(items[i])}); }
   function cancelEditType(i:number){ const snap=items[i]._snapshot; mut(i, snap? {...snap, _edit:false, _snapshot:undefined}:{_edit:false}); }
-  function saveEditType(i:number){ mut(i,{_edit:false,_snapshot:undefined}); }
-
-  function addGrade(i:number){ const t = items[i]; mut(i,{grades:[{grams:[], sizes:[]}, ...(t.grades||[])]}); }
-  function delGrade(i:number, gi:number){ const t = items[i]; mut(i,{grades:(t.grades||[]).filter((_,gx)=>gx!==gi)}); }
-  function addGramChip(typeIdx:number, gradeIdx:number, gram:number){
+  function saveEditType(i:number){ const grouped = groupEquivalentGrades(items[i].grades); mut(i,{_edit:false,_snapshot:undefined, grades: grouped}); }
+  
+  function addGrade(i:number){ const t=items[i]; mut(i,{grades:[{grams:[], sizes:[]}, ...(t.grades||[])]}); }
+  function delGrade(i:number, gi:number){ const t=items[i]; mut(i,{grades:(t.grades||[]).filter((_,gx)=>gx!==gi)}); }
+  function addGramChip(typeIdx:number, gradeIdx:number, gram:number | null){
+      if (gram === null || gram <= 0) {
+        setAddingGram(null);
+        return;
+      }
       const g = items[typeIdx].grades[gradeIdx];
       const grams = Array.from(new Set([...(g.grams||[]), gram])).sort((a,b)=>a-b);
       mutGrade(typeIdx, gradeIdx, {grams});
+      setNewGramValue("");
+      setAddingGram(null);
   }
   function removeGramChip(typeIdx:number, gradeIdx:number, gram:number){
       const g = items[typeIdx].grades[gradeIdx];
       const grams = (g.grams||[]).filter(g => g !== gram);
       if(grams.length === 0 && g.sizes.length > 0){
-          if(!confirm("Esto borrará el último gramaje. Se borrarán también los tamaños asociados. ¿Continuar?")){
+          if(!confirm("Esto borrará el último gramaje y todos los tamaños asociados. ¿Continuar?")){
               return;
           }
           delGrade(typeIdx, gradeIdx);
@@ -110,7 +103,9 @@ export default function MaterialsAdmin(){
       const r = await fetch("/api/admin/materials",{method:"PUT",headers:{'Content-Type':'application/json'}, body: JSON.stringify({items:payload})});
       const j = await r.json();
       if(!r.ok) throw new Error(j?.error || "Falló guardado");
-      setItems((j.items||payload)); setDirty(false); setMsg("Guardado OK");
+      setItems((j.items||payload).map((t:any) => ({...t, _edit: false, grades: groupEquivalentGrades(t.grades)}))); 
+      setDirty(false); 
+      setMsg("Guardado OK");
     }catch(e:any){ setMsg("No se pudo guardar: "+(e?.message||"error")); }
   }
 
@@ -132,9 +127,9 @@ export default function MaterialsAdmin(){
                       length_mm: Number(s.factorySize?.len || 0),
                       width_mm: Number(s.factorySize?.wid || 0),
                       supplier: "",
-                      usd_per_ton: Number(row.priceIndex || 0)
+                      usd_per_ton: toNum(String(row.priceIndex))
                   })),
-                  usd: Number(row.priceIndex || 0)
+                  usd: toNum(String(row.priceIndex))
               });
           });
 
@@ -164,7 +159,7 @@ export default function MaterialsAdmin(){
         {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
-
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((t, ti)=>(
           <div key={ti} className="rounded-xl border border-white/15 bg-black/40 p-4">
@@ -188,19 +183,21 @@ export default function MaterialsAdmin(){
               </div>
               {(t.grades||[]).map((g, gi)=>(
                 <div key={gi} className="rounded-lg border border-white/10 bg-black/30 p-3">
-                  <div className="flex items-center flex-wrap gap-2 mb-2">
-                    {(g.grams||[]).map(gram => (
-                      <span key={gram} className="inline-flex items-center gap-2 bg-white text-black rounded-full px-3 py-1 text-sm">
-                        {gram} g
-                        {t._edit && <button className="text-red-700" onClick={()=>removeGramChip(ti,gi,gram)}><Trash2 size={14}/></button>}
-                      </span>
-                    ))}
-                    {t._edit && (
-                      addingGram?.typeIdx === ti && addingGram?.gradeIdx === gi ?
-                      <input autoFocus className="inp !py-1 !px-2 w-20" placeholder="g" value={newGramValue} onChange={e=>setNewGramValue(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){addGramChip(ti,gi,Number(newGramValue)); setAddingGram(null);}}} onBlur={()=>setAddingGram(null)} />
-                      : <button className="btn-ok !px-2 !py-1" onClick={()=>setAddingGram({typeIdx:ti, gradeIdx:gi})}><Plus size={14}/></button>
-                    )}
-                    {t._edit && <button className="btn-danger ml-auto" title="Eliminar bloque" onClick={()=>delGrade(ti,gi)}><Trash2 size={16}/></button>}
+                  <div className="flex items-start justify-between flex-wrap gap-2 mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(g.grams||[]).map(gram => (
+                        <span key={gram} className="inline-flex items-center gap-2 bg-white text-black rounded-full px-3 py-1 text-sm">
+                          {gram} g
+                          {t._edit && <button className="text-red-700 hover:text-red-500" onClick={()=>removeGramChip(ti,gi,gram)}><Trash2 size={14}/></button>}
+                        </span>
+                      ))}
+                      {t._edit && (
+                        addingGram?.typeIdx === ti && addingGram?.gradeIdx === gi ?
+                        <input autoFocus className="inp !py-1 !px-2 w-20" placeholder="g" value={newGramValue} onChange={e=>setNewGramValue(e.target.value)} onKeyDown={e=>{if(e.key==='Enter') addGramChip(ti,gi,toNum(newGramValue));}} onBlur={()=>addGramChip(ti,gi,toNum(newGramValue))} />
+                        : <button className="btn-ok !px-2 !py-1" onClick={()=>setAddingGram({typeIdx:ti, gradeIdx:gi})}><Plus size={14}/></button>
+                      )}
+                    </div>
+                     {t._edit && <button className="btn-danger" title="Eliminar este bloque de gramajes" onClick={()=>delGrade(ti,gi)}><Trash2 size={16}/></button>}
                   </div>
 
                   <div className="space-y-2">
