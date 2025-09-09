@@ -1,4 +1,4 @@
-﻿/* app/admin/cuts/page.tsx  Importar/editar/exportar cortes con el JSON del ejemplo */
+﻿/* app/admin/cuts/page.tsx  parche: limpiar file-input seguro y mensajes mejorados */
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Pencil, RotateCcw, Upload } from "lucide-react";
@@ -13,7 +13,6 @@ export default function CutsAdmin(){
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // Cargar desde API si existe (opcional)
   useEffect(()=>{ (async()=>{
     try{
       const r = await fetch("/api/admin/cuts",{cache:"no-store"});
@@ -46,12 +45,6 @@ export default function CutsAdmin(){
     if(!confirm("¿Eliminar este grupo de cortes?")) return;
     setGroups(p=>p.filter((_,ix)=>ix!==i)); setDirty(true);
   }
-  function startEdit(i:number){ mut(i,{_edit:true,_snapshot:structuredClone(groups[i])}); }
-  function cancelEdit(i:number){
-    const snap = groups[i]._snapshot;
-    mut(i, snap? {...snap,_edit:false,_snapshot:undefined}:{_edit:false});
-  }
-  function saveEdit(i:number){ mut(i,{_edit:false,_snapshot:undefined}); }
 
   function addRow(i:number){
     const g = groups[i];
@@ -69,14 +62,21 @@ export default function CutsAdmin(){
         ...g,
         sheetSizes:(g.sheetSizes||[]).map(({_edit:__,...s})=>s)
       }));
-      const r = await fetch("/api/admin/cuts",{method:"PUT",headers:{'Content-Type':'application/json'}, body: JSON.stringify({items:payload})});
-      const j = await r.json().catch(()=>({}));
-      // Si no hay tabla, seguimos igual (fallback solo JSON)
-      setGroups(payload.map(g=>({...g,_edit:false,_snapshot:undefined, sheetSizes:g.sheetSizes.map(s=>({...s,_edit:false}))})));
+      const r = await fetch("/api/admin/cuts",{
+        method:"PUT",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({items:payload})
+      });
+      if(!r.ok){
+        const t = await r.text();
+        throw new Error(`PUT /api/admin/cuts  ${r.status}. ${t}`);
+      }
+      const j = await r.json();
+      setGroups((j.items||payload).map((g:any)=>({...g,_edit:false,_snapshot:undefined, sheetSizes:(g.sheetSizes||[]).map((s:any)=>({...s,_edit:false}))})));
       setDirty(false);
-      setMsg(r.ok? "Guardado OK": "No se pudo guardar en DB (usá Exportar JSON).");
+      setMsg("Guardado OK");
     }catch(e:any){
-      setMsg("No se pudo guardar en DB (usá Exportar JSON).");
+      setMsg(e?.message || "No se pudo guardar (usá Exportar JSON).");
     }
   }
 
@@ -93,7 +93,8 @@ export default function CutsAdmin(){
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Cortes</h1>
         <input type="file" accept="application/json" onChange={async e=>{
-          const f=e.target.files?.[0]; if(!f) return;
+          const input = e.currentTarget; // capturamos antes del await
+          const f = input.files?.[0]; if(!f) return;
           try{
             const arr = JSON.parse(await f.text());
             const list:CutGroup[] = (Array.isArray(arr)?arr:[]).map((g:any)=>({
@@ -101,9 +102,10 @@ export default function CutsAdmin(){
               sheetSizes:(g?.sheetSizes||[]).map((s:any)=>({length:Number(s?.length)||0, width:Number(s?.width)||0, preferred:!!s?.preferred, _edit:false})),
               _edit:false,_snapshot:undefined
             }));
-            setGroups(list); setDirty(true);
+            setGroups(list); setDirty(true); setMsg(`Importados ${list.length} grupos (sin guardar)`);
           }catch{ alert("JSON inválido"); }
-          e.currentTarget.value="";
+          // limpiar input de forma segura
+          input.value = "";
         }}/>
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addGroup}>Agregar grupo</button>
         <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
@@ -112,15 +114,12 @@ export default function CutsAdmin(){
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      {/* 3 tarjetas por fila en desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {groups.map((g,gi)=>(
           <div key={gi} className="rounded-xl border border-white/15 bg-black/40 p-4">
             <div className="flex items-center justify-between mb-2">
               {!g._edit ? (
-                <div className="text-lg font-semibold">
-                  Papel {g.forPaperSize.length}{g.forPaperSize.width} mm
-                </div>
+                <div className="text-lg font-semibold">Papel {g.forPaperSize.length}{g.forPaperSize.width} mm</div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   <input className="inp" type="number" placeholder="L" value={g.forPaperSize.length}
@@ -142,7 +141,6 @@ export default function CutsAdmin(){
               )}
             </div>
 
-            {/* Listado de cortes */}
             {!g._edit ? (
               <div className="space-y-2">
                 {g.sheetSizes.map((s,si)=>(
@@ -158,7 +156,6 @@ export default function CutsAdmin(){
                 </div>
                 {g.sheetSizes.map((s,si)=>(
                   <div key={si} className="rounded border border-black/60 bg-white text-black p-2">
-                    {/* Edición compacta: L (4)  W (4)  Preferido (3)  Borrar (1) => 12 cols */}
                     <div className="grid grid-cols-12 gap-2 items-center">
                       <input className="inp col-span-4" type="number" placeholder="Largo"  value={s.length} onChange={e=>mutRow(gi,si,{length:toNum(e.target.value)||0})}/>
                       <input className="inp col-span-4" type="number" placeholder="Ancho"  value={s.width}  onChange={e=>mutRow(gi,si,{width:toNum(e.target.value)||0})}/>

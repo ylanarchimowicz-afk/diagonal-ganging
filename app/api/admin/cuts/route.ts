@@ -1,47 +1,49 @@
-﻿import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabaseServer";
+﻿/* app/api/admin/cuts/route.ts
+   GET  -> devuelve { items }
+   PUT  -> guarda { items } en memoria de la lambda y devuelve eco
+   OPTIONS -> 200 (para preflight)
+*/
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+// Memoria simple mientras no haya DB
+let MEMORY: { items: any[] } = { items: [] };
+
+function jsonOk(data: any, init: ResponseInit = {}) {
+  return NextResponse.json(data, { status: 200, ...init, headers: { "Cache-Control": "no-store", ...(init.headers||{}) } });
+}
+function jsonErr(message: string, code = 400) {
+  return NextResponse.json({ error: message }, { status: code, headers: { "Cache-Control": "no-store" } });
+}
 
 export async function GET() {
-  try{
-    const supa = supabaseServer();
-    const { data, error } = await supa.from("cuts").select("*").order("created_at",{ascending:true});
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    const items = (data||[]).map((r:any)=> ({
-      forPaperSize: { length:r.for_len_mm, width:r.for_wid_mm },
-      sheetSizes: Array.isArray(r.sheet_sizes) ? r.sheet_sizes : [],
-    }));
-    return NextResponse.json({ items });
-  }catch{
-    return new NextResponse(null, { status: 204 });
+  return jsonOk(MEMORY);
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const items = Array.isArray(body?.items) ? body.items : [];
+    MEMORY = { items };
+    return jsonOk({ items });
+  } catch (e: any) {
+    return jsonErr(e?.message || "invalid json", 400);
   }
 }
 
-export async function PUT(req: NextRequest) {
-  let payload:any = {};
-  try{ payload = await req.json(); }catch{}
-  const items = Array.isArray(payload?.items) ? payload.items : [];
-  if (!items.length) return NextResponse.json({ error:"items vacío" }, { status:400 });
-
-  const rows = items.map((g:any)=> ({
-    for_len_mm: g?.forPaperSize?.length ?? null,
-    for_wid_mm: g?.forPaperSize?.width ?? null,
-    sheet_sizes: Array.isArray(g?.sheetSizes) ? g.sheetSizes.map((s:any)=>({
-      length: s?.length ?? null,
-      width:  s?.width  ?? null,
-      preferred: !!s?.preferred
-    })) : [],
-  }));
-
-  try{
-    const supa = supabaseServer();
-    const { data, error } = await supa.from("cuts").upsert(rows, { ignoreDuplicates:false }).select("*");
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    const out = (data||[]).map((r:any)=> ({
-      forPaperSize: { length:r.for_len_mm, width:r.for_wid_mm },
-      sheetSizes: Array.isArray(r.sheet_sizes) ? r.sheet_sizes : [],
-    }));
-    return NextResponse.json({ items: out });
-  }catch(err:any){
-    return NextResponse.json({ error: (err?.message || "Tabla 'cuts' inexistente. Crea la tabla o usa Exportar JSON.") }, { status: 500 });
-  }
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,PUT,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 }
+
+// 405 para el resto
+export const POST = () => jsonErr("Method Not Allowed", 405);
+export const PATCH = () => jsonErr("Method Not Allowed", 405);
+export const DELETE = () => jsonErr("Method Not Allowed", 405);
