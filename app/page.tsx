@@ -1,13 +1,8 @@
-export default function Home() {
+﻿export default function Home() {
   return (
-    <main style={{padding:24, fontFamily:'system-ui'}}>
-      <h1>Diagonal — Ganging / Imposición (Starter)</h1>
-      <ol>
-        <li>Admin → Cargar <code>Máquinas</code>, <code>Cortes</code>, <code>Materiales</code></li>
-        <li>Crear Job (Auto o Manual)</li>
-        <li>Analyze → Confirm → Plan → Impose → Exports</li>
-      </ol>
-      <p>Endpoints mock listos en <code>/api</code>.</p>
+    <main className='container py-8'>
+      <h1 className='text-3xl font-bold text-lime-300'>Tailwind OK  Diagonal</h1>
+      <p className='text-white/70 mt-2'>Si ves este título verde, estamos.</p>
     </main>
   );
 }
