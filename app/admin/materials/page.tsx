@@ -3,14 +3,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Pencil, RotateCcw, Upload } from "lucide-react";
 
-type SizeRow = { length_mm: number; width_mm: number; supplier?: string; usd_per_ton?: number; };
+type SizeRow = { length_mm: number; width_mm: number; supplier?: string; usd_per_ton?: number | null; };
 type Grade = { grams: number[]; sizes: SizeRow[]; };
 type MaterialType = { id?: string; name: string; grades: Grade[]; _edit?: boolean; _snapshot?: MaterialType; };
+
+// Tipo para el JSON externo que importas
+type ExternalMaterialRow = {
+    name?: string;
+    paperWeight?: number;
+    priceIndex?: number | null;
+    materialSizes?: {
+        factorySize?: {
+            len?: number;
+            wid?: number;
+        };
+        stocked?: boolean;
+    }[];
+};
 
 const toNum = (s:string)=>{ const n = Number(s); return Number.isFinite(n) ? n : null; };
 
 // Helper para agrupar gramajes con tamaños idénticos
-function groupEquivalentGrades(grades: any[]): Grade[] {
+function groupEquivalentGrades(grades: {grams: number[], sizes: SizeRow[]}[]): Grade[] {
   const bySignature: Record<string, number[]> = {};
   const sizesBySignature: Record<string, SizeRow[]> = {};
   const keyForSizes = (sizes: SizeRow[]) => (sizes||[]).map(s => `${s.length_mm}x${s.width_mm}:${s.supplier}:${s.usd_per_ton}`).sort().join('|');
@@ -19,7 +33,7 @@ function groupEquivalentGrades(grades: any[]): Grade[] {
     const sig = keyForSizes(g.sizes || []);
     if (!bySignature[sig]) bySignature[sig] = [];
     if (!sizesBySignature[sig]) sizesBySignature[sig] = g.sizes || [];
-    bySignature[sig].push(...(Array.isArray(g.grams) ? g.grams : [g.grams]));
+    bySignature[sig].push(...(Array.isArray(g.grams) ? g.grams : [g.grams as number]));
   });
 
   return Object.keys(bySignature).map(sig => ({
@@ -28,10 +42,10 @@ function groupEquivalentGrades(grades: any[]): Grade[] {
   }));
 }
 
-export default function MaterialsAdmin() {
-  const [items, setItems] = useState<MaterialType[]>([]);
-  const [dirty, setDirty] = useState(false);
-  const [msg, setMsg] = useState("");
+export default function MaterialsAdmin(){
+  const [items,setItems] = useState<MaterialType[]>([]);
+  const [dirty,setDirty] = useState(false);
+  const [msg,setMsg] = useState("");
   const [addingGram, setAddingGram] = useState<{typeIdx:number, gradeIdx:number}|null>(null);
   const [newGramValue, setNewGramValue] = useState("");
 
@@ -66,8 +80,8 @@ export default function MaterialsAdmin() {
   function cancelEditType(i:number){ const snap=items[i]._snapshot; mut(i, snap? {...snap, _edit:false, _snapshot:undefined}:{_edit:false}); }
   function saveEditType(i:number){ mut(i,{_edit:false,_snapshot:undefined}); }
 
-  function addGrade(i:number){ const t=items[i]; mut(i,{grades:[{grams:[], sizes:[]}, ...(t.grades||[])]}); }
-  function delGrade(i:number, gi:number){ const t=items[i]; mut(i,{grades:(t.grades||[]).filter((_,gx)=>gx!==gi)}); }
+  function addGrade(i:number){ const t = items[i]; mut(i,{grades:[{grams:[], sizes:[]}, ...(t.grades||[])]}); }
+  function delGrade(i:number, gi:number){ const t = items[i]; mut(i,{grades:(t.grades||[]).filter((_,gx)=>gx!==gi)}); }
   function addGramChip(typeIdx:number, gradeIdx:number, gram:number){
       const g = items[typeIdx].grades[gradeIdx];
       const grams = Array.from(new Set([...(g.grams||[]), gram])).sort((a,b)=>a-b);
@@ -106,10 +120,10 @@ export default function MaterialsAdmin() {
       const f=e.currentTarget.files?.[0]; if(!f) return;
       try{
           const raw = JSON.parse(await f.text());
-          const external = Array.isArray(raw)?raw:(Array.isArray(raw?.items)?raw.items:[]);
+          const external: ExternalMaterialRow[] = Array.isArray(raw)?raw:(Array.isArray(raw?.items)?raw.items:[]);
           const byName: Record<string, {grams:number, sizes:SizeRow[], usd:number|null}[]> = {};
           
-          external.forEach(row => {
+          external.forEach((row: ExternalMaterialRow) => {
               const name = row.name || "Sin nombre";
               if(!byName[name]) byName[name] = [];
               byName[name].push({
@@ -118,8 +132,7 @@ export default function MaterialsAdmin() {
                       length_mm: Number(s.factorySize?.len || 0),
                       width_mm: Number(s.factorySize?.wid || 0),
                       supplier: "",
-                      usd_per_ton: Number(row.priceIndex || 0),
-                      preferred: !!s.stocked
+                      usd_per_ton: Number(row.priceIndex || 0)
                   })),
                   usd: Number(row.priceIndex || 0)
               });
