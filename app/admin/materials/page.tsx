@@ -1,277 +1,253 @@
-﻿/* app/admin/materials/page.tsx  Tipo  Gramajes (chips)  Tamaños (4 inputs) con duplicar */
-"use client";
+﻿"use client";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Upload, RotateCcw, Pencil, Copy } from "lucide-react";
+import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
 
-type SizeRow = { length_mm: number; width_mm: number; provider?: string; cost_per_ton_usd?: number };
-type WeightCard = { gsms: number[]; sizes: SizeRow[]; _edit?: boolean; _snapshot?: WeightCard };
-type MaterialType = { name: string; weights: WeightCard[]; _edit?: boolean; _snapshot?: MaterialType };
+/** ===== Tipos de UI (interno) ===== */
+type Size = { w:number; l:number; supplier?:string; usdPerTon?:number|null; preferred?:boolean };
+type Gram = { grams:number[]; // chips de gramajes que comparten tamaños/costos
+              sizes: Size[];
+              indexHint?: number|null; // priceIndex del JSON externo (pista, no costo)
+            };
+type MatType = { name:string; grams: Gram[]; _edit?:boolean; _snapshot?:MatType };
 
-const toNum = (s:string)=>{ const n=Number(s); return Number.isFinite(n)?n:0; };
-const uniq = (a:number[]) => Array.from(new Set(a.filter(n=>Number.isFinite(n)))).sort((x,y)=>x-y);
+/** Helpers */
+const toNum = (s:string) => { const n = Number(s); return Number.isFinite(n) ? n : 0; };
+const clone = <T,>(x:T)=> JSON.parse(JSON.stringify(x)) as T;
+
+/** === Mapea JSON externo (array plano)  UI MatType[]  ===
+ *  Entrada (ejemplo): [{ id, name, priceIndex, paperWeight, materialSizes:[{factorySize:{wid,len},stocked}] }, ...]
+ */
+function mapExternalMaterials(json:any): MatType[] {
+  if (!Array.isArray(json)) return [];
+  // Agrupo por name  luego por paperWeight
+  const byName: Record<string, Record<number, { indexHint:number|null; sizes: Size[] }>> = {};
+  for (const row of json) {
+    if (!row || typeof row!=="object") continue;
+    const name = String(row.name ?? "Sin nombre");
+    const weight = Number(row.paperWeight ?? 0);
+    const priceIndex = (row.priceIndex!=null) ? Number(row.priceIndex) : null;
+    const sizesSrc: any[] = Array.isArray(row.materialSizes) ? row.materialSizes : [];
+
+    if (!byName[name]) byName[name] = {};
+    if (!byName[name][weight]) byName[name][weight] = { indexHint: priceIndex, sizes: [] };
+
+    for (const s of sizesSrc) {
+      const w = Number(s?.factorySize?.wid ?? 0);
+      const l = Number(s?.factorySize?.len ?? 0);
+      const preferred = Boolean(s?.stocked);
+      if (w>0 && l>0) byName[name][weight].sizes.push({ w, l, preferred, usdPerTon: null, supplier: "" });
+    }
+  }
+
+  const result: MatType[] = [];
+  for (const name of Object.keys(byName)) {
+    const grams: Gram[] = [];
+    for (const weightStr of Object.keys(byName[name])) {
+      const weight = Number(weightStr);
+      const entry = byName[name][weight];
+      grams.push({
+        grams: [weight],
+        sizes: entry.sizes,
+        indexHint: entry.indexHint ?? null,
+      });
+    }
+    // ordeno por gramaje
+    grams.sort((a,b)=> (a.grams[0]??0)-(b.grams[0]??0));
+    result.push({ name, grams });
+  }
+  // ordeno tipos alfabéticamente
+  result.sort((a,b)=> a.name.localeCompare(b.name));
+  return result;
+}
 
 export default function MaterialsAdmin(){
-  const [items, setItems] = useState<MaterialType[]>([]);
+  const [items, setItems] = useState<MatType[]>([]);
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
 
-  useEffect(()=>{ (async()=>{
+  // Carga actual desde API (si existe)
+  useEffect(()=>{(async()=>{
     try{
-      const r = await fetch("/api/admin/materials",{cache:"no-store"});
-      if(!r.ok) return;
+      const r = await fetch("/api/admin/materials", { cache:"no-store" });
+      if (!r.ok) return;
       const j = await r.json();
-      if(Array.isArray(j.items)) setItems(normalizeIn(j.items));
-    }catch{}
-  })(); },[]);
-
-  function normalizeIn(raw:any[]):MaterialType[] {
-    const isGrouped = (o:any)=> Array.isArray(o?.weights);
-    if(raw.every(isGrouped)) {
-      // Acepta pesos como "gsm" (numero) o "gsms" (array)
-      return raw.map((t:any)=>({
-        name: String(t.name||""),
-        weights: (t.weights||[]).map((w:any)=>({
-          gsms: Array.isArray(w.gsms) ? uniq(w.gsms) : uniq([Number(w.gsm||0)]),
-          sizes: (w.sizes||[]).map((s:any)=>({
-            length_mm: Number(s.length_mm||0),
-            width_mm: Number(s.width_mm||0),
-            provider: s.provider||"",
-            cost_per_ton_usd: s.cost_per_ton_usd!=null? Number(s.cost_per_ton_usd): undefined
-          })),
-          _edit:false
-        })),
-        _edit:false
-      }));
-    }
-    // Formato plano  agrupo por name y gsm; cada gsm queda como card con gsms:[gsm]
-    const map = new Map<string, Map<number, SizeRow[]>>();
-    for(const r of raw){
-      const name = String(r.name||"");
-      const gsm  = Number(r.gsm||0);
-      const sz: SizeRow = {
-        length_mm: Number(r.length_mm||r.len||r.L||0),
-        width_mm:  Number(r.width_mm ||r.wid||r.W||0),
-        provider: r.provider||r.proveedor||"",
-        cost_per_ton_usd: r.cost_per_ton_usd!=null? Number(r.cost_per_ton_usd): undefined
-      };
-      if(!map.has(name)) map.set(name,new Map());
-      const g = map.get(name)!;
-      if(!g.has(gsm)) g.set(gsm,[]);
-      g.get(gsm)!.push(sz);
-    }
-    const out:MaterialType[]=[];
-    for(const [name, m] of map.entries()){
-      const weights:WeightCard[]=[];
-      for(const [gsm, sizes] of m.entries()){
-        weights.push({ gsms:[gsm], sizes, _edit:false });
+      // intentamos entender si ya viene en nuestro formato
+      const arr = Array.isArray(j?.items) ? j.items : [];
+      if (arr.length){
+        setItems(arr as MatType[]);
       }
-      out.push({ name, weights, _edit:false });
-    }
-    return out;
+    }catch{}
+  })()},[]);
+
+  function addType(){
+    setItems(p=>[ { name:"Nuevo tipo", grams:[{ grams:[80], sizes:[] }], _edit:true }, ...p ]);
+    setDirty(true);
+  }
+  function startEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? ({...t, _edit:true, _snapshot:clone(t)}) : t)); }
+  function cancelEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? (t._snapshot ? {...t._snapshot, _edit:false, _snapshot:undefined} : {...t, _edit:false}) : t)); }
+  function saveEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? ({...t, _edit:false, _snapshot:undefined}) : t)); }
+
+  function rmType(ix:number){
+    if(!confirm("¿Eliminar este tipo de papel y todos sus gramajes?")) return;
+    setItems(p=>p.filter((_,i)=>i!==ix)); setDirty(true);
   }
 
-  function setDirtyItems(next:MaterialType[]){ setItems(next); setDirty(true); }
-
-  // Tipo
-  function addType(){ setDirtyItems([{ name:"Nuevo tipo", weights:[], _edit:true }, ...items]); }
-  function startEditType(i:number){ setDirtyItems(items.map((t,ix)=> ix===i?({...t,_edit:true,_snapshot:structuredClone(t)}):t)); }
-  function cancelEditType(i:number){ setDirtyItems(items.map((t,ix)=> ix===i?(t._snapshot?({...t._snapshot,_edit:false,_snapshot:undefined}):({...t,_edit:false})):t)); }
-  function saveEditType(i:number){ setDirtyItems(items.map((t,ix)=> ix===i?({...t,_edit:false,_snapshot:undefined}):t)); }
-  function delType(i:number){ if(!confirm("¿Eliminar tipo de papel?"))return; setDirtyItems(items.filter((_,ix)=>ix!==i)); }
-  function mutType(i:number, patch:Partial<MaterialType>){ setDirtyItems(items.map((t,ix)=> ix===i?({...t,...patch}):t)); }
-
-  // Gramaje (card)
-  function addWeight(i:number){ const t=items[i]; mutType(i,{weights:[{gsms:[0],sizes:[],_edit:true},...(t.weights||[])]}); }
-  function startEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,_edit:true,_snapshot:structuredClone(w)}):w); mutType(i,{weights:next}); }
-  function cancelEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?(w._snapshot?({...w._snapshot,_edit:false,_snapshot:undefined}):({...w,_edit:false})):w); mutType(i,{weights:next}); }
-  function saveEditWeight(i:number, wi:number){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,gsms:uniq(w.gsms),_edit:false,_snapshot:undefined}):w); mutType(i,{weights:next}); }
-  function delWeight(i:number, wi:number){ if(!confirm("¿Eliminar gramaje?"))return; const t=items[i]; mutType(i,{weights:(t.weights||[]).filter((_,wx)=>wx!==wi)}); }
-  function mutWeight(i:number, wi:number, patch:Partial<WeightCard>){ const t=items[i]; const next=(t.weights||[]).map((w,wx)=> wx===wi?({...w,...patch}):w); mutType(i,{weights:next}); }
-
-  // Chips de gsm
-  function addGsmChip(i:number, wi:number){
-    const val = prompt("Nuevo gramaje (g/m):","");
-    if(val===null) return;
-    const n = toNum(val);
-    if(!n){ alert("Valor inválido."); return; }
-    const t=items[i]; const w=t.weights[wi];
-    mutWeight(i,wi,{gsms: uniq([...(w.gsms||[]), n])});
+  function addGram(ix:number){
+    setItems(p=>p.map((t,i)=> i===ix ? ({...t, grams:[{ grams:[80], sizes:[] }, ...t.grams] }) : t));
+    setDirty(true);
   }
-  function removeGsmChip(i:number, wi:number, gsm:number){
-    const t=items[i]; const w=t.weights[wi];
-    const filtered = (w.gsms||[]).filter(x=>x!==gsm);
-    if(filtered.length===0){ alert("Debe quedar al menos un gramaje."); return; }
-    mutWeight(i,wi,{gsms: filtered});
+  function rmGram(ix:number, gx:number){
+    setItems(p=>p.map((t,i)=> i===ix ? ({...t, grams:t.grams.filter((_,j)=>j!==gx)}) : t)); setDirty(true);
   }
-  function duplicateWeight(i:number, wi:number){
-    const val = prompt("Duplicar: nuevo gramaje (g/m):","");
-    if(val===null) return;
-    const gsm = toNum(val); if(!gsm){ alert("Valor inválido."); return; }
-    const t=items[i]; const w=t.weights[wi];
-    const clone: WeightCard = { gsms:[gsm], sizes: structuredClone(w.sizes), _edit:true };
-    mutType(i,{weights:[clone, ...t.weights]});
+  function mutType(ix:number, patch:Partial<MatType>){
+    setItems(p=>p.map((t,i)=> i===ix ? ({...t, ...patch}) : t)); setDirty(true);
+  }
+  function mutGram(ix:number, gx:number, patch:Partial<Gram>){
+    setItems(p=>p.map((t,i)=> i===ix ? ({...t, grams: t.grams.map((g,j)=> j===gx ? ({...g, ...patch}) : g) }) : t));
+    setDirty(true);
+  }
+  function mutSize(ix:number, gx:number, sx:number, patch:Partial<Size>){
+    setItems(p=>p.map((t,i)=> i===ix ? ({
+      ...t,
+      grams: t.grams.map((g,j)=> j===gx ? ({
+        ...g,
+        sizes: g.sizes.map((s,k)=> k===sx ? ({...s, ...patch}) : s)
+      }) : g)
+    }) : t));
+    setDirty(true);
+  }
+  function addSize(ix:number, gx:number){
+    setItems(p=>p.map((t,i)=> i===ix ? ({
+      ...t, grams: t.grams.map((g,j)=> j===gx ? ({...g, sizes:[...g.sizes, { w:0, l:0, preferred:false, usdPerTon:null, supplier:"" }]}) : g)
+    }) : t));
+    setDirty(true);
+  }
+  function rmSize(ix:number, gx:number, sx:number){
+    setItems(p=>p.map((t,i)=> i===ix ? ({
+      ...t, grams: t.grams.map((g,j)=> j===gx ? ({...g, sizes:g.sizes.filter((_,k)=>k!==sx)}) : g)
+    }) : t));
+    setDirty(true);
   }
 
-  // Tamaños
-  function addSize(i:number, wi:number){ const t=items[i]; const w=t.weights[wi]; mutWeight(i,wi,{sizes:[{length_mm:0,width_mm:0,provider:"",cost_per_ton_usd:undefined},...(w.sizes||[])]}); }
-  function delSize(i:number, wi:number, si:number){ const t=items[i]; const w=t.weights[wi]; mutWeight(i,wi,{sizes:(w.sizes||[]).filter((_,sx)=>sx!==si)}); }
-  function mutSize(i:number, wi:number, si:number, patch:Partial<SizeRow>){
-    const t=items[i]; const w=t.weights[wi]; const list=[...(w.sizes||[])];
-    list[si]={...(list[si]||{length_mm:0,width_mm:0}),...patch};
-    mutWeight(i,wi,{sizes:list});
-  }
-
-  // Guardar / Exportar / Importar (exporta gsms; compat: si alguien espera gsm, toma el primero)
-  async function onSaveAll(){
+  async function saveAll(){
     setMsg("Guardando");
     try{
-      const payload = items.map(({_edit,_snapshot,...r})=>({
-        ...r,
-        weights: r.weights.map(({_edit:__,_snapshot:___,...w})=>w)
-      }));
-      const r = await fetch("/api/admin/materials",{method:"PUT",headers:{'Content-Type':'application/json'},body:JSON.stringify({items:payload})});
-      const j = await r.json();
-      if(!r.ok) throw new Error(j?.error||"Fallo al guardar");
-      setItems(normalizeIn(j.items||payload).map(t=>({...t,_edit:false})));
-      setDirty(false); setMsg(`Guardado OK (${(j.items||payload).length})`);
-    }catch(err:any){
-      setMsg("No se pudo guardar en DB: "+(err.message||"error desconocido")+" (igual podés exportar JSON)");
+      const payload = { items: items.map(({_edit,_snapshot, ...t})=>t) };
+      const r = await fetch("/api/admin/materials", { method:"PUT", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+      if (!r.ok){ const j = await r.json().catch(()=>null); throw new Error(j?.error || "falló el guardado"); }
+      setDirty(false); setMsg("Guardado OK");
+    }catch(e:any){ setMsg("No se pudo guardar: "+(e?.message||"error")); }
+  }
+
+  /** Importa tanto nuestro formato documentado como el JSON externo plano */
+  async function onImportFile(file:File){
+    try{
+      const txt = await file.text();
+      const j = JSON.parse(txt);
+      let imported: MatType[] = [];
+      if (Array.isArray(j) && j.length && j[0]?.paperWeight !== undefined && j[0]?.materialSizes !== undefined){
+        // JSON EXTERNO (array plano) => agrupar
+        imported = mapExternalMaterials(j);
+      } else if (Array.isArray(j?.items)) {
+        // nuestro contenedor items
+        imported = j.items;
+      } else if (Array.isArray(j)) {
+        // quizá ya sea MatType[] crudo
+        imported = j;
+      }
+      if (!imported.length) throw new Error("Estructura no reconocida");
+      setItems(imported.map(t=>({...t, _edit:false, _snapshot:undefined})));
+      setDirty(true); setMsg(`Importados ${imported.length} tipos (sin guardar)`);
+    }catch(e:any){
+      alert("No se pudo importar el JSON: " + (e?.message || "error"));
     }
   }
-  const exportHref = useMemo(()=> {
-    const payload = items.map(({_edit,_snapshot,...r})=>({
-      ...r,
-      weights: r.weights.map(({_edit:__,_snapshot:___,...w})=>w)
-    }));
-    return URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
-  },[items]);
 
-  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>){
-    const f=e.target.files?.[0]; if(!f) return;
-    try{
-      const raw = JSON.parse(await f.text());
-      const arr = Array.isArray(raw)?raw:(Array.isArray(raw?.items)?raw.items:[]);
-      const norm = normalizeIn(arr);
-      if(!norm.length) { alert("JSON de materiales inválido."); return; }
-      setItems(norm); setDirty(true);
-      setMsg(`Importados ${norm.length} tipos (sin guardar)`);
-    }catch{ alert("JSON inválido."); }
-    e.currentTarget.value="";
-  }
+  const exportHref = useMemo(()=> {
+    const blob = new Blob([JSON.stringify({ items }, null, 2)], { type:"application/json" });
+    return URL.createObjectURL(blob);
+  }, [items]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Materiales</h1>
-        <input type="file" accept="application/json" onChange={onImportFile}/>
+        <input type="file" accept="application/json" onChange={e=>{ const f=e.currentTarget.files?.[0]; if(f) onImportFile(f); e.currentTarget.value=""; }} />
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addType}>Agregar tipo</button>
-        <button className="px-3 py-2 rounded bg-white/10 border border-white/20" onClick={onSaveAll} disabled={!dirty}>Guardar</button>
+        <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
         <a href={exportHref} download="materials.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
         {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {items.map((t,i)=>(
-          <div key={i} className="rounded-xl border border-white/15 bg-black/40 p-4">
-            <div className="flex items-center justify-between">
+        {items.map((t,ix)=>(
+          <div key={ix} className="rounded-xl border border-white/15 bg-black/40 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <input className="inp w-full text-lg font-semibold min-w-0" value={t.name} onChange={e=>mutType(ix,{name:e.target.value})} disabled={!t._edit} />
               {!t._edit ? (
-                <div className="text-lg font-semibold">{t.name}</div>
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Editar" onClick={()=>startEdit(ix)}><Pencil size={18}/></button>
+                </div>
               ) : (
-                <input className="inp text-lg font-semibold" value={t.name} onChange={e=>mutType(i,{name:e.target.value})}/>
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEdit(ix)}><RotateCcw size={18}/></button>
+                  <button className="btn-ok" title="Guardar" onClick={()=>saveEdit(ix)}><Upload size={18}/></button>
+                  <button className="btn-danger" title="Eliminar tipo" onClick={()=>rmType(ix)}><Trash2 size={18}/></button>
+                </div>
               )}
-              {!t._edit
-                ? <button className="btn-ghost" title="Editar" onClick={()=>startEditType(i)}><Pencil size={16}/></button>
-                : <div className="flex gap-2">
-                    <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEditType(i)}><RotateCcw size={16}/></button>
-                    <button className="btn-ok" title="Guardar" onClick={()=>saveEditType(i)}><Upload size={16}/></button>
-                    <button className="btn-danger" title="Eliminar tipo" onClick={()=>delType(i)}><Trash2 size={16}/></button>
-                  </div>}
             </div>
 
-            {/* WEIGHTS */}
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-2">
+            <div className="mt-3 space-y-4">
+              {/* Gramajes */}
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-white/80 font-semibold">Gramajes</span>
-                {t._edit && <button className="btn-ok" onClick={()=>addWeight(i)}><Plus size={14}/> Agregar gramaje</button>}
+                {t._edit && <button className="btn-ok flex items-center gap-1" onClick={()=>addGram(ix)}><Plus size={16}/> Añadir g</button>}
               </div>
 
-              <div className="space-y-3">
-                {(t.weights||[]).map((w,wi)=>(
-                  <div key={wi} className="rounded-lg border border-white/15 bg-black/30 p-3">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      {/* Chips de gsms */}
-                      <div className="flex flex-wrap gap-2">
-                        {(w.gsms||[]).map(gsm=>(
-                          <span key={gsm} className="chip">
-                            {gsm} g
-                            {w._edit && <button className="chip-x" onClick={()=>removeGsmChip(i,wi,gsm)}></button>}
-                          </span>
-                        ))}
-                        {w._edit && <button className="btn-ghost" onClick={()=>addGsmChip(i,wi)}><Plus size={14}/> Añadir g</button>}
-                      </div>
-
-                      {!w._edit
-                        ? <div className="flex gap-2">
-                            <button className="btn-ghost" title="Duplicar" onClick={()=>duplicateWeight(i,wi)}><Copy size={14}/></button>
-                            <button className="btn-ghost" title="Editar gramaje" onClick={()=>startEditWeight(i,wi)}><Pencil size={14}/></button>
-                          </div>
-                        : <div className="flex gap-2">
-                            <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEditWeight(i,wi)}><RotateCcw size={14}/></button>
-                            <button className="btn-ok" title="Guardar" onClick={()=>saveEditWeight(i,wi)}><Upload size={14}/></button>
-                            <button className="btn-danger" title="Eliminar gramaje" onClick={()=>delWeight(i,wi)}><Trash2 size={14}/></button>
-                          </div>}
-                    </div>
-
-                    {/* SIZES */}
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-white/80">Tamaños</span>
-                        {w._edit && <button className="btn-ok" onClick={()=>addSize(i,wi)}><Plus size={12}/> Añadir tamaño</button>}
-                      </div>
-
-                      <div className="mt-2 space-y-2">
-                        {(w.sizes||[]).map((s,si)=>(
-                          <div key={si} className="rounded-md border border-black/60 bg-white text-black p-2">
-                            {!w._edit ? (
-                              <div className="grid grid-cols-4 gap-2 text-sm">
-                                <div>{s.length_mm}  {s.width_mm} mm</div>
-                                <div>Proveedor: <b>{s.provider||"-"}</b></div>
-                                <div>USD/Ton: <b>{s.cost_per_ton_usd ?? "-"}</b></div>
-                                <div></div>
-                              </div>
-                            ) : (
-                              // 4 inputs  1/4 cada uno + borrar al final
-                              <div className="grid grid-cols-9 gap-2 items-center">
-                                <input className="inp col-span-2" type="number" placeholder="Ancho (mm)" value={s.length_mm} onChange={e=>mutSize(i,wi,si,{length_mm:toNum(e.target.value)})}/>
-                                <input className="inp col-span-2" type="number" placeholder="Largo (mm)" value={s.width_mm}  onChange={e=>mutSize(i,wi,si,{width_mm:toNum(e.target.value)})}/>
-                                <input className="inp col-span-3" placeholder="Proveedor" value={s.provider||""} onChange={e=>mutSize(i,wi,si,{provider:e.target.value})}/>
-                                <input className="inp col-span-1" type="number" placeholder="USD/Ton" value={s.cost_per_ton_usd ?? ""} onChange={e=>mutSize(i,wi,si,{cost_per_ton_usd:toNum(e.target.value)})}/>
-                                <div className="col-span-1 flex justify-end"><button className="btn-danger" onClick={()=>delSize(i,wi,si)}><Trash2 size={14}/></button></div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {(w.sizes||[]).length===0 && <div className="text-xs text-white/60">Sin tamaños</div>}
-                      </div>
-                    </div>
+              {t.grams.map((g,gx)=>(
+                <div key={gx} className="rounded-lg border border-white/10 p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    {/* chips de gramajes */}
+                    <input
+                      className="inp w-32"
+                      value={g.grams.join(", ")}
+                      onChange={e=>mutGram(ix,gx,{ grams: e.target.value.split(",").map(s=>toNum(s.trim())).filter(n=>n>0) })}
+                      disabled={!t._edit}
+                      placeholder="80, 90"
+                    />
+                    <span className="text-xs text-white/50">Índice: {g.indexHint ?? "-"}</span>
+                    {t._edit && <button className="btn-danger ml-auto" title="Borrar gramaje" onClick={()=>rmGram(ix,gx)}><Trash2 size={16}/></button>}
                   </div>
-                ))}
-                {(t.weights||[]).length===0 && <div className="text-xs text-white/60">Sin gramajes</div>}
-              </div>
+
+                  {/* Lista de tamaños/costos */}
+                  <div className="space-y-2">
+                    {g.sizes.map((s,sx)=>(
+                      <div key={sx} className="grid grid-cols-12 gap-2">
+                        <input className="inp col-span-3" type="number" value={s.w} onChange={e=>mutSize(ix,gx,sx,{w:toNum(e.target.value)})} disabled={!t._edit} placeholder="ancho" />
+                        <input className="inp col-span-3" type="number" value={s.l} onChange={e=>mutSize(ix,gx,sx,{l:toNum(e.target.value)})} disabled={!t._edit} placeholder="largo" />
+                        <input className="inp col-span-3" value={s.supplier ?? ""} onChange={e=>mutSize(ix,gx,sx,{supplier:e.target.value})} disabled={!t._edit} placeholder="proveedor" />
+                        <input className="inp col-span-2" type="number" inputMode="decimal" value={s.usdPerTon ?? ""} onChange={e=>mutSize(ix,gx,sx,{usdPerTon: e.target.value===""?null: Number(e.target.value)})} disabled={!t._edit} placeholder="USD/Ton" />
+                        <label className="col-span-1 flex items-center gap-2 text-xs">
+                          <input type="checkbox" checked={!!s.preferred} onChange={e=>mutSize(ix,gx,sx,{preferred:e.target.checked})} disabled={!t._edit} />
+                          Pref.
+                        </label>
+                        {t._edit && <button className="btn-danger col-span-12 sm:col-span-12 justify-self-end" onClick={()=>rmSize(ix,gx,sx)}><Trash2 size={16}/></button>}
+                      </div>
+                    ))}
+                  </div>
+
+                  {t._edit && <div className="mt-2">
+                    <button className="btn-ok" onClick={()=>addSize(ix,gx)}><Plus size={16}/> Añadir tamaño</button>
+                  </div>}
+                </div>
+              ))}
             </div>
           </div>
         ))}
       </div>
-
-      <style jsx>{`
-        .inp{background:#fff;color:#000;border:1px solid #111;padding:.45rem .6rem;border-radius:.55rem;}
-        .btn-ghost{padding:.35rem .5rem;border:1px solid rgba(255,255,255,.35);border-radius:.55rem;background:transparent;}
-        .btn-danger{padding:.35rem .5rem;border:1px solid #dc2626;background:#fee2e2;color:#991b1b;border-radius:.55rem;}
-        .btn-ok{padding:.35rem .5rem;border:1px solid #16a34a;background:#dcfce7;color:#14532d;border-radius:.55rem;}
-        .chip{background:#e5e7eb;color:#111;border-radius:9999px;padding:.15rem .6rem;display:inline-flex;align-items:center;gap:.35rem;font-weight:600}
-        .chip-x{background:transparent;border:none;color:#6b7280;font-size:14px;line-height:1}
-      `}</style>
     </div>
   );
 }
+
+/* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
