@@ -10,7 +10,7 @@ type Machine = {
   max_len_mm?: number|null; max_wid_mm?: number|null;
   min_len_mm?: number|null; min_wid_mm?: number|null;
   mech_clamp_mm?: number; mech_tail_mm?: number; mech_sides_mm?: number;
-  base_setup_usd?: number; base_wash_usd?: number;
+  base_setup_usd?: number|null; base_wash_usd?: number|null;
   price_brackets?: Bracket[];
 };
 
@@ -154,3 +154,4 @@ function BracketEditor({ value, onChange }:{ value: any[]; onChange:(v:any[])=>v
     </div>
   );
 }
+
