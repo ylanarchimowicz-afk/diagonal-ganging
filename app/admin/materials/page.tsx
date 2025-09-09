@@ -62,7 +62,7 @@ function mapExternalMaterials(json:any): MatType[] {
 }
 
 export default function MaterialsAdmin(){
-  // === Importador robusto: acepta tu JSON externo y el interno ===
+    // === Importador robusto: acepta tu JSON externo y el interno ===
   async function handleImport(e:any){
     const f = e.currentTarget?.files?.[0];
     if(!f) return;
@@ -71,7 +71,7 @@ export default function MaterialsAdmin(){
       const raw = JSON.parse(txt);
       let items:any[] = [];
       if (looksLikeExternalMaterials(raw)) {
-        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon -> preferred
+        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon, stocked -> preferred
       } else if (Array.isArray((raw as any)?.items)) {
         items = (raw as any).items; // formato interno
       } else if (Array.isArray(raw)) {
@@ -79,7 +79,6 @@ export default function MaterialsAdmin(){
       } else {
         throw new Error("Estructura no reconocida");
       }
-      // Estas variables ya existen en tu componente original
       // @ts-ignore
       setItems(items);
       // @ts-ignore
@@ -91,144 +90,6 @@ export default function MaterialsAdmin(){
     }
     try { e.currentTarget.value = ""; } catch {}
   }
-
-  // === Importador robusto: acepta tu JSON externo y el interno ===
-  async function handleImport(e:any){
-    const f = e.currentTarget?.files?.[0];
-    if(!f) return;
-    try{
-      const txt = await f.text();
-      const raw = JSON.parse(txt);
-      let items:any[] = [];
-      if (looksLikeExternalMaterials(raw)) {
-        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon -> preferred
-      } else if (Array.isArray((raw as any)?.items)) {
-        items = (raw as any).items; // formato interno
-      } else if (Array.isArray(raw)) {
-        items = raw;                // ya normalizado
-      } else {
-        throw new Error("Estructura no reconocida");
-      }
-      // Estas variables ya existen en tu componente original
-      // @ts-ignore
-      setItems(items);
-      // @ts-ignore
-      setDirty?.(true);
-      // @ts-ignore
-      setMsg?.(`Importados ${items.length} tipos (sin guardar)`);
-    } catch(err:any){
-      alert("No se pudo importar el JSON: " + (err?.message || "error"));
-    }
-    // limpiar el input
-    try { e.currentTarget.value = ""; } catch {}
-  }
-
-  const [items, setItems] = useState<MatType[]>([]);
-  const [dirty, setDirty] = useState(false);
-  const [msg, setMsg] = useState("");
-
-  // Carga actual desde API (si existe)
-  useEffect(()=>{(async()=>{
-    try{
-      const r = await fetch("/api/admin/materials", { cache:"no-store" });
-      if (!r.ok) return;
-      const j = await r.json();
-      // intentamos entender si ya viene en nuestro formato
-      const arr = Array.isArray(j?.items) ? j.items : [];
-      if (arr.length){
-        setItems(arr as MatType[]);
-      }
-    }catch{}
-  })()},[]);
-
-  function addType(){
-    setItems(p=>[ { name:"Nuevo tipo", grams:[{ grams:[80], sizes:[] }], _edit:true }, ...p ]);
-    setDirty(true);
-  }
-  function startEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? ({...t, _edit:true, _snapshot:clone(t)}) : t)); }
-  function cancelEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? (t._snapshot ? {...t._snapshot, _edit:false, _snapshot:undefined} : {...t, _edit:false}) : t)); }
-  function saveEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? ({...t, _edit:false, _snapshot:undefined}) : t)); }
-
-  function rmType(ix:number){
-    if(!confirm("¿Eliminar este tipo de papel y todos sus gramajes?")) return;
-    setItems(p=>p.filter((_,i)=>i!==ix)); setDirty(true);
-  }
-
-  function addGram(ix:number){
-    setItems(p=>p.map((t,i)=> i===ix ? ({...t, grams:[{ grams:[80], sizes:[] }, ...t.grams] }) : t));
-    setDirty(true);
-  }
-  function rmGram(ix:number, gx:number){
-    setItems(p=>p.map((t,i)=> i===ix ? ({...t, grams:t.grams.filter((_,j)=>j!==gx)}) : t)); setDirty(true);
-  }
-  function mutType(ix:number, patch:Partial<MatType>){
-    setItems(p=>p.map((t,i)=> i===ix ? ({...t, ...patch}) : t)); setDirty(true);
-  }
-  function mutGram(ix:number, gx:number, patch:Partial<Gram>){
-    setItems(p=>p.map((t,i)=> i===ix ? ({...t, grams: t.grams.map((g,j)=> j===gx ? ({...g, ...patch}) : g) }) : t));
-    setDirty(true);
-  }
-  function mutSize(ix:number, gx:number, sx:number, patch:Partial<Size>){
-    setItems(p=>p.map((t,i)=> i===ix ? ({
-      ...t,
-      grams: t.grams.map((g,j)=> j===gx ? ({
-        ...g,
-        sizes: g.sizes.map((s,k)=> k===sx ? ({...s, ...patch}) : s)
-      }) : g)
-    }) : t));
-    setDirty(true);
-  }
-  function addSize(ix:number, gx:number){
-    setItems(p=>p.map((t,i)=> i===ix ? ({
-      ...t, grams: t.grams.map((g,j)=> j===gx ? ({...g, sizes:[...g.sizes, { w:0, l:0, preferred:false, usdPerTon:null, supplier:"" }]}) : g)
-    }) : t));
-    setDirty(true);
-  }
-  function rmSize(ix:number, gx:number, sx:number){
-    setItems(p=>p.map((t,i)=> i===ix ? ({
-      ...t, grams: t.grams.map((g,j)=> j===gx ? ({...g, sizes:g.sizes.filter((_,k)=>k!==sx)}) : g)
-    }) : t));
-    setDirty(true);
-  }
-
-  async function saveAll(){
-    setMsg("Guardando");
-    try{
-      const payload = { items: items.map(({_edit,_snapshot, ...t})=>t) };
-      const r = await fetch("/api/admin/materials", { method:"PUT", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
-      if (!r.ok){ const j = await r.json().catch(()=>null); throw new Error(j?.error || "falló el guardado"); }
-      setDirty(false); setMsg("Guardado OK");
-    }catch(e:any){ setMsg("No se pudo guardar: "+(e?.message||"error")); }
-  }
-
-  /** Importa tanto nuestro formato documentado como el JSON externo plano */
-  async function onImportFile(file:File){
-    try{
-      const txt = await file.text();
-      const j = JSON.parse(txt);
-      let imported: MatType[] = [];
-      if (Array.isArray(j) && j.length && j[0]?.paperWeight !== undefined && j[0]?.materialSizes !== undefined){
-        // JSON EXTERNO (array plano) => agrupar
-        imported = mapExternalMaterials(j);
-      } else if (Array.isArray(j?.items)) {
-        // nuestro contenedor items
-        imported = j.items;
-      } else if (Array.isArray(j)) {
-        // quizá ya sea MatType[] crudo
-        imported = j;
-      }
-      if (!imported.length) throw new Error("Estructura no reconocida");
-      setItems(imported.map(t=>({...t, _edit:false, _snapshot:undefined})));
-      setDirty(true); setMsg(`Importados ${imported.length} tipos (sin guardar)`);
-    }catch(e:any){
-      alert("No se pudo importar el JSON: " + (e?.message || "error"));
-    }
-  }
-
-  const exportHref = useMemo(()=> {
-    const blob = new Blob([JSON.stringify({ items }, null, 2)], { type:"application/json" });
-    return URL.createObjectURL(blob);
-  }, [items]);
 
   return (
     <div className="space-y-5">
@@ -324,6 +185,7 @@ export default function MaterialsAdmin(){
 }
 
 /* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
+
 
 
 
