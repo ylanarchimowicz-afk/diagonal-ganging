@@ -2,18 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Utilidades seguras (sin shadcn) */
+/* Base dark + reset suave */
+@layer base {
+  html, body { @apply h-full; }
+  body { @apply min-h-screen bg-zinc-900 text-zinc-100 antialiased; }
+  a { @apply underline-offset-4 hover:underline; }
+}
+
+/* Utilidades comunes sin clases custom raras */
 @layer components {
-  .inp {
-    @apply bg-white text-black border border-gray-900 rounded-md px-3 py-2 disabled:opacity-70;
-  }
-  .btn-ghost {
-    @apply px-2.5 py-1.5 rounded border border-gray-400 text-white/90;
-  }
-  .btn-ok {
-    @apply px-2.5 py-1.5 rounded border border-green-600 bg-green-100 text-green-900;
-  }
-  .btn-danger {
-    @apply px-2.5 py-1.5 rounded border border-red-600 bg-red-100 text-red-900;
-  }
+  .inp         { @apply bg-white text-black border border-gray-900 rounded-md px-3 py-2 disabled:opacity-70; }
+  .btn-ghost   { @apply px-2.5 py-1.5 rounded border border-gray-400 text-white/90; }
+  .btn-ok      { @apply px-2.5 py-1.5 rounded border border-green-600 bg-green-100 text-green-900; }
+  .btn-danger  { @apply px-2.5 py-1.5 rounded border border-red-600 bg-red-100 text-red-900; }
 }
