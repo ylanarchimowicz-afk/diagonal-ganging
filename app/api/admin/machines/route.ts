@@ -23,7 +23,6 @@ export async function PUT(req: NextRequest) {
 
   const rows = incoming.map((m: any) => {
     const row: any = {
-      // NO enviamos id si no existe (evita 'null value in column id')
       name: String(m.name ?? "Sin nombre"),
       is_offset: !!m.is_offset,
       max_len_mm: m.max_len_mm ?? null,
@@ -35,22 +34,16 @@ export async function PUT(req: NextRequest) {
       mech_sides_mm: m.mech_sides_mm ?? 0,
       base_setup_usd: m.base_setup_usd ?? null,
       base_wash_usd: m.base_wash_usd ?? null,
-      base_setup_uyu: m.base_setup_uyu ?? null,
-      base_wash_uyu: m.base_wash_uyu ?? null,
       min_impressions: m.min_impressions ?? null,
       feed_long_edge: !!m.feed_long_edge,
       price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : (m.priceBrackets ?? []),
     };
-    if (m.id) row.id = m.id; // sólo si existe
+    if (m.id) row.id = m.id;
     return row;
   });
 
   const supa = supabaseServer();
-  const { data, error } = await supa
-    .from("machines")
-    .upsert(rows, { onConflict: "id", ignoreDuplicates: false })
-    .select("*");
-
+  const { data, error } = await supa.from("machines").upsert(rows, { onConflict: "id", ignoreDuplicates: false }).select("*");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ items: data ?? [] });
 }
@@ -70,8 +63,6 @@ export async function POST(req: NextRequest) {
     mech_sides_mm: m.mech_sides_mm ?? 0,
     base_setup_usd: m.base_setup_usd ?? null,
     base_wash_usd: m.base_wash_usd ?? null,
-    base_setup_uyu: m.base_setup_uyu ?? null,
-    base_wash_uyu: m.base_wash_uyu ?? null,
     min_impressions: m.min_impressions ?? null,
     feed_long_edge: !!m.feed_long_edge,
     price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : (m.priceBrackets ?? []),
