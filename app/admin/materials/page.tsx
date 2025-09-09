@@ -1,4 +1,5 @@
 ﻿"use client";
+import { normalizeExternalMaterials, looksLikeExternalMaterials } from "@/app/lib/materials-normalize";
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
 
@@ -172,7 +173,36 @@ export default function MaterialsAdmin(){
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Materiales</h1>
-        <input type="file" accept="application/json" onChange={e=>{ const f=e.currentTarget.files?.[0]; if(f) onImportFile(f); e.currentTarget.value=""; }} />
+        <input type="file" accept="application/json" onChange={async (e)=>{
+  const f = e.currentTarget.files?.[0];
+  if (!f) return;
+  try{
+    const txt = await f.text();
+    const raw = JSON.parse(txt);
+    let items:any[] = [];
+    if (looksLikeExternalMaterials(raw)) {
+      // Tu JSON: id, name, priceIndex(=USD/Ton), paperWeight, materialSizes[].factorySize.{wid,len}, stocked
+      items = normalizeExternalMaterials(raw);
+    } else if (Array.isArray((raw as any)?.items)) {
+      items = (raw as any).items;                 // formato interno contenedor
+    } else if (Array.isArray(raw)) {
+      items = raw;                                // arreglo ya normalizado
+    } else {
+      throw new Error("Estructura no reconocida");
+    }
+    // La UI queda igual; solo cargamos el estado con la forma esperada
+    // (tipo -> gramaje -> tamaños; usdPerTon tomado de priceIndex).
+    // @ts-ignore
+    setItems(items);
+    // @ts-ignore
+    setDirty?.(true);
+    // @ts-ignore
+    setMsg?.(Importados  tipos (sin guardar));
+  } catch (err:any) {
+    alert("No se pudo importar el JSON: " + (err?.message || "error"));
+  }
+  e.currentTarget.value = "";
+}} />
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addType}>Agregar tipo</button>
         <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
         <a href={exportHref} download="materials.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
