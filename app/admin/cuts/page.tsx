@@ -1,175 +1,179 @@
+/* app/admin/cuts/page.tsx */
 "use client";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, Pencil, RotateCcw, Upload } from "lucide-react";
 
-import React, { useMemo, useState } from "react";
+type SheetSize = { length: number; width: number; preferred?: boolean };
+type CutGroup = { forPaperSize: { length: number; width: number }, sheetSizes: SheetSize[], _edit?: boolean, _snapshot?: CutGroup };
 
-type CutSize = { w: number; l: number; preferred?: boolean };
-type CutGroup = { paper_w: number; paper_l: number; sizes: CutSize[] };
+const toNum = (s:string)=>{ const n = Number(s); return Number.isFinite(n) ? n : 0; };
 
-function dlFile(name: string, data: any) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-  a.download = name;
-  a.click();
-}
-
-export default function CutsPage() {
+export default function CutsAdmin(){
   const [groups, setGroups] = useState<CutGroup[]>([]);
-  const [dirty, setDirty]   = useState(false);
-  const totalCuts = useMemo(()=> groups.reduce((acc,g)=>acc + g.sizes.length, 0), [groups]);
+  const [dirty, setDirty] = useState(false);
+  const [msg, setMsg] = useState("");
 
-  function addGroup() {
-    setGroups(g=>[...g, { paper_w: 0, paper_l: 0, sizes: [] }]);
-    setDirty(true);
+  useEffect(()=>{ (async()=>{
+    try{
+      const r = await fetch("/api/admin/cuts",{cache:"no-store"});
+      if(!r.ok) return;
+      const j = await r.json();
+      if (Array.isArray(j?.items)) {
+        setGroups(j.items.map((g:any)=>({...g,_edit:false,_snapshot:undefined, sheetSizes:(g.sheetSizes||[]).map((s:any)=>({...s,_edit:false}))})));
+      }
+    }catch{}
+  })(); },[]);
+
+  function mut(i:number, patch:Partial<CutGroup>){
+    setGroups(p=>p.map((x,ix)=>ix===i?({...x,...patch}):x)); setDirty(true);
   }
-  function rmGroup(i:number){
-    setGroups(g => g.filter((_,ix)=>ix!==i));
-    setDirty(true);
-  }
-  function mutGroup(i:number, patch:Partial<CutGroup>) {
-    setGroups(g => g.map((x,ix)=> ix===i ? { ...x, ...patch } : x));
-    setDirty(true);
-  }
-  function addSize(gi:number){
-    setGroups(g => g.map((x,ix)=> ix===gi ? { ...x, sizes:[...x.sizes, {w:0,l:0,preferred:false}] } : x));
-    setDirty(true);
-  }
-  function rmSize(gi:number, si:number){
-    setGroups(g => g.map((x,ix)=> ix===gi ? { ...x, sizes: x.sizes.filter((_,jx)=>jx!==si) } : x));
-    setDirty(true);
-  }
-  function mutSize(gi:number, si:number, patch:Partial<CutSize>){
-    setGroups(g => g.map((x,ix)=> {
-      if (ix!==gi) return x;
-      return { ...x, sizes: x.sizes.map((s,jx)=> jx===si ? { ...s, ...patch } : s) };
-    }));
-    setDirty(true);
+  function mutRow(i:number, ri:number, patch:Partial<SheetSize>){
+    const g = groups[i];
+    const list = [...(g.sheetSizes||[])];
+    list[ri] = {...list[ri], ...patch};
+    mut(i,{sheetSizes:list});
   }
 
-  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.currentTarget.files?.[0];
-    if (!f) return;
-    try {
-      const raw = JSON.parse(await f.text());
-      // Acepta array de grupos o { groups: [...] }
-      const arr: CutGroup[] = Array.isArray(raw) ? raw : Array.isArray(raw?.groups) ? raw.groups : [];
-      if (!arr.length) throw new Error("Estructura no reconocida");
-      setGroups(arr);
-      setDirty(true);
-    } catch (err:any) {
-      alert("No se pudo importar el JSON: " + (err?.message ?? "error"));
-    } finally {
-      e.currentTarget.value = "";
+  function addGroup(){
+    setGroups(p=>[
+      { forPaperSize:{length:720,width:1020}, sheetSizes:[], _edit:true },
+      ...p
+    ]);
+    setDirty(true);
+  }
+  function delGroup(i:number){
+    if(!confirm("¿Eliminar este grupo de cortes?")) return;
+    setGroups(p=>p.filter((_,ix)=>ix!==i)); setDirty(true);
+  }
+  function startEdit(i:number){ mut(i,{_edit:true,_snapshot:structuredClone(groups[i])}); }
+  function cancelEdit(i:number){
+    const snap = groups[i]._snapshot;
+    mut(i, snap? {...snap,_edit:false,_snapshot:undefined}:{_edit:false});
+  }
+  function saveEdit(i:number){ mut(i,{_edit:false,_snapshot:undefined}); }
+
+  function addRow(i:number){
+    const g = groups[i];
+    mut(i,{sheetSizes:[{length:g.forPaperSize.length,width:g.forPaperSize.width,preferred:false}, ...(g.sheetSizes||[])]});
+  }
+  function delRow(i:number, ri:number){
+    const g = groups[i];
+    mut(i,{sheetSizes:(g.sheetSizes||[]).filter((_,rx)=>rx!==ri)});
+  }
+
+  async function saveAll(){
+    setMsg("Guardando…");
+    try{
+      const payload = groups.map(({_edit,_snapshot, ...g})=>({
+        ...g,
+        sheetSizes:(g.sheetSizes||[]).map(({_edit:__,...s})=>s)
+      }));
+      const r = await fetch("/api/admin/cuts",{method:"PUT",headers:{'Content-Type':'application/json'}, body: JSON.stringify({items:payload})});
+      const j = await r.json().catch(()=>({}));
+      setGroups(payload.map(g=>({...g,_edit:false,_snapshot:undefined, sheetSizes:g.sheetSizes.map(s=>({...s,_edit:false}))})));
+      setDirty(false);
+      setMsg(r.ok? "Guardado OK": "No se pudo guardar en DB (usá Exportar JSON).");
+    }catch(e:any){
+      setMsg("No se pudo guardar en DB (usá Exportar JSON).");
     }
   }
 
-  function onExport() {
-    dlFile("cuts.json", groups);
-    setDirty(false);
-  }
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const f = e.currentTarget.files?.[0];
-  if (!f) return;
-  try {
-    const txt = await f.text();
-    const raw = JSON.parse(txt);
-
-    // Acepta: [{paper_w, paper_l, cuts:[{w,l,preferred}]}]  o  {groups:[...]}
-    const groupsIn: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.groups) ? raw.groups : []);
-    if (!groupsIn.length) throw new Error("Estructura no reconocida. Esperaba array o {groups:[...]}.");
-
-    const norm = groupsIn.map((g: any) => ({
-      paper_w: Number(g.paper_w ?? g.w ?? g.width ?? 0),
-      paper_l: Number(g.paper_l ?? g.l ?? g.length ?? 0),
-      cuts: (Array.isArray(g.cuts) ? g.cuts : []).map((c: any) => ({
-        w: Number(c.w ?? 0),
-        l: Number(c.l ?? 0),
-        preferred: !!c.preferred,
-      })),
+  const exportHref = useMemo(()=>{
+    const clean = groups.map(({_edit,_snapshot,...g})=>({
+      ...g,
+      sheetSizes:(g.sheetSizes||[]).map(({_edit:__,...s})=>s)
     }));
+    return URL.createObjectURL(new Blob([JSON.stringify(clean,null,2)],{type:"application/json"}));
+  },[groups]);
 
-    if (typeof setGroups === "function") setGroups(norm);
-    if (typeof setDirty === "function")  setDirty(true);
-    if (typeof setMsg === "function")    setMsg(`Importados ${norm.length} grupos (sin guardar)`);
-  } catch (err:any) {
-    alert("No se pudo importar el JSON: " + (err?.message || "error"));
+  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>){
+      const f = e.currentTarget.files?.[0]; if(!f) return;
+      try{
+        const arr = JSON.parse(await f.text());
+        const list:CutGroup[] = (Array.isArray(arr)?arr:[]).map((g:any)=>({
+          forPaperSize:{length:Number(g?.forPaperSize?.length)||0, width:Number(g?.forPaperSize?.width)||0},
+          sheetSizes:(g?.sheetSizes||[]).map((s:any)=>({length:Number(s?.length)||0, width:Number(s?.width)||0, preferred:!!s?.preferred})),
+        }));
+        setGroups(list); setDirty(true);
+      }catch{ alert("JSON inválido"); }
+      e.currentTarget.value="";
   }
-  e.currentTarget.value = "";
-};
 
+  return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-center gap-3">
-        <a href="/admin" className="btn btn-ghost gap-2">Volver</a>
+        <a href="/admin" className="px-3 py-2 rounded bg-white/10 border border-white/20">↩︎ Volver</a>
         <h1 className="text-2xl font-bold">Cortes</h1>
-        <input type="file" accept="application/json" / onChange={handleImport}>
-        <button className="btn" onClick={addGroup}>Agregar grupo</button>
-        <button className="btn" onClick={onExport}>Exportar JSON</button>
-        {dirty && <span className="text-yellow-400">Cambios sin guardar</span>}
-        <span className="opacity-70 ml-auto">{groups.length} grupos  {totalCuts} cortes</span>
+        <input type="file" accept="application/json" onChange={onImportFile}/>
+        <button className="px-3 py-2 rounded bg-white text-black" onClick={addGroup}>Agregar grupo</button>
+        <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
+        <a href={exportHref} download="cuts.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
+        {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
+        {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      {/* Grupos */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {groups.map((g, gi)=>(
-          <section key={gi} className="rounded-lg border p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <label className="text-sm w-40">Ancho del papel</label>
-              <input
-                className="input input-bordered w-28"
-                type="number" value={g.paper_w}
-                onChange={e=>mutGroup(gi,{paper_w:Number(e.target.value)})}
-              />
-              <label className="text-sm w-40">Largo del papel</label>
-              <input
-                className="input input-bordered w-28"
-                type="number" value={g.paper_l}
-                onChange={e=>mutGroup(gi,{paper_l:Number(e.target.value)})}
-              />
-              <div className="ml-auto flex gap-2">
-                <button className="btn btn-success btn-sm" onClick={()=>addSize(gi)}>+ AÃ±adir</button>
-                <button className="btn btn-error btn-sm" onClick={()=>rmGroup(gi)}>Eliminar grupo</button>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {groups.map((g,gi)=>(
+          <div key={gi} className="rounded-xl border border-white/15 bg-black/40 p-4">
+            <div className="flex items-center justify-between mb-2">
+              {!g._edit ? (
+                <div className="text-lg font-semibold">
+                  Papel {g.forPaperSize.length}×{g.forPaperSize.width} mm
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <input className="inp" type="number" placeholder="L" value={g.forPaperSize.length}
+                         onChange={e=>mut(gi,{forPaperSize:{...g.forPaperSize,length:toNum(e.target.value)||0}})} />
+                  <input className="inp" type="number" placeholder="W" value={g.forPaperSize.width}
+                         onChange={e=>mut(gi,{forPaperSize:{...g.forPaperSize,width:toNum(e.target.value)||0}})} />
+                </div>
+              )}
+              {!g._edit ? (
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Editar" onClick={()=>startEdit(gi)}><Pencil size={16}/></button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEdit(gi)}><RotateCcw size={16}/></button>
+                  <button className="btn-ok" title="Guardar" onClick={()=>saveEdit(gi)}><Upload size={16}/></button>
+                  <button className="btn-danger" title="Eliminar grupo" onClick={()=>delGroup(gi)}><Trash2 size={16}/></button>
+                </div>
+              )}
             </div>
 
-            {/* Cortes */}
-            <div className="space-y-2">
-              {g.sizes.map((s, si)=>(
-                <div key={si} className="flex items-center gap-3 rounded-md border p-2">
-                  {/* Ancho y Largo: mÃ¡s chicos para dejar lugar al toggle */}
-                  <input
-                    className="input input-bordered w-24"
-                    placeholder="Ancho"
-                    type="number" value={s.w}
-                    onChange={e=>mutSize(gi,si,{w:Number(e.target.value)})}
-                  />
-                  <input
-                    className="input input-bordered w-24"
-                    placeholder="Largo"
-                    type="number" value={s.l}
-                    onChange={e=>mutSize(gi,si,{l:Number(e.target.value)})}
-                  />
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-white/80 font-semibold">Cortes</span>
+              {g._edit && <button className="btn-ok flex items-center gap-1" onClick={()=>addRow(gi)}><Plus size={14}/> Añadir</button>}
+            </div>
 
-                  {/* Toggle preferido: ocupa mÃ¡s espacio y no se corta el texto */}
-                  <div className="flex items-center gap-2 grow">
-                    <span className="text-sm whitespace-nowrap">Preferido</span>
-                    <label className="inline-flex cursor-pointer items-center">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={!!s.preferred}
-                        onChange={e=>mutSize(gi,si,{preferred:e.target.checked})}
-                      />
-                      <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative transition-all">
-                        <div className="absolute top-0.5 left-0.5 h-5 w-5 bg-white rounded-full transition-all peer-checked:translate-x-6"></div>
+            <div className="mt-2 space-y-2">
+              {(g.sheetSizes||[]).map((s,si)=>(
+                <div key={si} className="rounded-lg border border-black/60 bg-white text-black p-2">
+                  {!g._edit ? (
+                    <div className="text-sm">
+                      {s.length}×{s.width} mm {s.preferred ? <span className="text-xs font-semibold text-green-700">(Preferido)</span> : ""}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-12 gap-2 items-center">
+                      <input className="inp col-span-3" type="number" value={s.length} onChange={e=>mutRow(gi,si,{length:toNum(e.target.value)||0})} placeholder="Ancho"/>
+                      <input className="inp col-span-3" type="number" value={s.width}  onChange={e=>mutRow(gi,si,{width:toNum(e.target.value)||0})}  placeholder="Largo"/>
+                      <label
+                        className={`col-span-5 rounded-full px-3 py-1 flex items-center justify-between cursor-pointer border ${s.preferred?'bg-green-600 text-white border-green-700':'bg-gray-200 text-gray-800 border-gray-300'}`}
+                      >
+                        <span className="text-sm font-semibold">{s.preferred?'PREFERIDO':'OFF'}</span>
+                        <input type="checkbox" className="hidden" checked={!!s.preferred} onChange={e=>mutRow(gi,si,{preferred:e.target.checked})} />
+                        <div className={`w-5 h-5 rounded-full transition-colors ${s.preferred ? 'bg-white/50' : 'bg-gray-400'}`}></div>
+                      </label>
+                      <div className="col-span-1 flex justify-end">
+                        <button className="btn-danger" onClick={()=>delRow(gi,si)} title="Borrar"><Trash2 size={16}/></button>
                       </div>
-                    </label>
-                  </div>
-
-                  <button className="btn btn-outline btn-error btn-sm" onClick={()=>rmSize(gi,si)}>Borrar</button>
+                    </div>
+                  )}
                 </div>
               ))}
+              {(g.sheetSizes||[]).length===0 && <div className="text-xs text-black/70 bg-white rounded p-2">Sin cortes</div>}
             </div>
-          </section>
+          </div>
         ))}
       </div>
     </div>

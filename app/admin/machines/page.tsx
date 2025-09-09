@@ -1,5 +1,4 @@
-/* app/admin/machines/page.tsx  fija desbordes en Costos por formato
-   -> inputs 100% de ancho + min-w-0 en wrappers (2x2: 1/2 del panel cada uno) */
+/* app/admin/machines/page.tsx */
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
@@ -17,7 +16,7 @@ type Machine = {
   max_wid_mm?: number | null;  // largo
   mech_clamp_mm?: number | null; // pinza
   mech_tail_mm?: number | null;  // cola
-  mech_sides_mm?: number | null; // mÃ¡rgenes
+  mech_sides_mm?: number | null; // márgenes
   base_setup_uyu?: number | null; // postura
   base_wash_uyu?: number | null;  // lavado
   base_setup_usd?: number | null;
@@ -45,20 +44,20 @@ export default function MachinesAdmin() {
   }, []);
 
   const toNum = (s: string) => { const n = Number(s); return Number.isFinite(n) ? n : null; };
-  function mut(i: number, patch: Partial<Machine>) { setItems(p => p.map((x,ix) => ix===i ? ({...x,...patch}) : x)); setDirty(true); }
+  function mut(i: number, patch: Partial<Machine>) { setItems(p => p.map((x, ix) => ix === i ? ({ ...x, ...patch }) : x)); setDirty(true); }
   function updBracket(mi: number, bi: number, patch: Partial<Bracket>) {
     const curr = items[mi].price_brackets ?? [];
-    const next = curr.map((x, idx) => idx===bi ? ({...x,...patch}) : x);
+    const next = curr.map((x, idx) => idx === bi ? ({ ...x, ...patch }) : x);
     mut(mi, { price_brackets: next });
   }
   function removeBracket(mi: number, bi: number) {
     const curr = items[mi].price_brackets ?? [];
-    mut(mi, { price_brackets: curr.filter((_, idx) => idx!==bi) });
+    mut(mi, { price_brackets: curr.filter((_, idx) => idx !== bi) });
   }
 
   function addMachine() {
     setItems(p => [{
-      name: "Nueva mÃ¡quina",
+      name: "Nueva máquina",
       is_offset: false,
       max_len_mm: null, max_wid_mm: null,
       mech_clamp_mm: 0, mech_tail_mm: 0, mech_sides_mm: 0,
@@ -71,50 +70,50 @@ export default function MachinesAdmin() {
   function startEdit(i: number) { mut(i, { _edit: true, _snapshot: structuredClone(items[i]) }); }
   function cancelEdit(i: number) {
     const snap = items[i]._snapshot;
-    setItems(p => p.map((x, ix) => ix===i ? (snap ? { ...snap, _edit: false, _snapshot: undefined } : { ...x, _edit: false }) : x));
+    setItems(p => p.map((x, ix) => ix === i ? (snap ? { ...snap, _edit: false, _snapshot: undefined } : { ...x, _edit: false }) : x));
   }
   function saveEdit(i: number) { mut(i, { _edit: false, _snapshot: undefined }); }
   async function deleteMachine(id?: string, idx?: number) {
-    if (!confirm("Â¿Eliminar mÃ¡quina?")) return;
+    if (!confirm("¿Eliminar máquina?")) return;
     try { if (id) await fetch(`/api/admin/machines?id=${id}`, { method: "DELETE" }); } catch {}
     setItems(p => p.filter((_, i) => i !== (idx ?? -1)));
     setDirty(true);
   }
 
   async function saveAll() {
-    setMsg("Guardando");
+    setMsg("Guardando…");
     try {
       const payload = items.map(({ _edit, _snapshot, ...r }) => r);
       const r = await fetch("/api/admin/machines", {
-        method: "PUT", headers: { "Content-Type":"application/json" }, body: JSON.stringify({ items: payload })
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: payload })
       });
       const j = await r.json();
-      if (!r.ok) throw new Error(j?.error || "fallÃ³ el guardado");
+      if (!r.ok) throw new Error(j?.error || "falló el guardado");
       setItems((j.items ?? payload).map((m: Machine) => ({ ...m, _edit: false, _snapshot: undefined })));
       setDirty(false); setMsg(`Guardado OK (${(j.items ?? payload).length})`);
     } catch (e: any) { setMsg("No se pudo guardar: " + (e?.message || "error")); }
   }
 
   const exportHref = useMemo(() =>
-    URL.createObjectURL(new Blob([JSON.stringify({ machines: items.map(({ _edit, _snapshot, ...r }) => r) }, null, 2)], { type:"application/json" })),
+    URL.createObjectURL(new Blob([JSON.stringify({ machines: items.map(({ _edit, _snapshot, ...r }) => r) }, null, 2)], { type: "application/json" })),
     [items]
   );
 
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
-        <a href="/admin" className="btn btn-ghost gap-2">Volver</a>
-        <h1 className="text-2xl font-bold">MÃ¡quinas</h1>
-        <input type="file" accept="application/json" onChange={async e=>{
-          const f=e.currentTarget.files?.[0]; if(!f) return;
-          try{
+        <a href="/admin" className="px-3 py-2 rounded bg-white/10 border border-white/20">↩︎ Volver</a>
+        <h1 className="text-2xl font-bold">Máquinas</h1>
+        <input type="file" accept="application/json" onChange={async e => {
+          const f = e.currentTarget.files?.[0]; if (!f) return;
+          try {
             const raw = JSON.parse(await f.text());
-            const arr:any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines)?raw.machines:(Array.isArray(raw?.items)?raw.items:[]));
-            const list:Machine[] = arr.map((m:any)=>({...m, price_brackets:Array.isArray(m.price_brackets)?m.price_brackets:[], _edit:false}));
+            const arr: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines) ? raw.machines : (Array.isArray(raw?.items) ? raw.items : []));
+            const list: Machine[] = arr.map((m: any) => ({ ...m, price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : [], _edit: false }));
             setItems(list); setDirty(true);
-          }catch{ alert("JSON invÃ¡lido"); }
-          e.currentTarget.value="";
-        }}/>
+          } catch { alert("JSON inválido"); }
+          e.currentTarget.value = "";
+        }} />
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addMachine}>Agregar</button>
         <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
         <a href={exportHref} download="machines.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
@@ -122,17 +121,16 @@ export default function MachinesAdmin() {
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      <p className="text-white/60 text-xs">Nota: la <b>primera medida</b> es la de <b>entrada a mÃ¡quina</b>.</p>
+      <p className="text-white/60 text-xs">Nota: la <b>primera medida</b> es la de <b>entrada a máquina</b>.</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((m, i) => (
           <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4">
-            {/* TÃ­tulo + acciones */}
             <div className="flex items-center justify-between gap-2">
               <input
                 className="inp w-full text-lg font-semibold min-w-0"
                 value={m.name} onChange={e => mut(i, { name: e.target.value })}
-                placeholder="Nombre de la mÃ¡quina" disabled={!m._edit}
+                placeholder="Nombre de la máquina" disabled={!m._edit}
               />
               {!m._edit ? (
                 <div className="flex gap-2">
@@ -147,9 +145,7 @@ export default function MachinesAdmin() {
               )}
             </div>
 
-            {/* Cuerpo: izquierda datos / derecha tramos */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Izquierda */}
               <div className="space-y-4">
                 <label className="grid gap-1 text-sm">
                   <span className="text-white/80">Tipo</span>
@@ -166,10 +162,10 @@ export default function MachinesAdmin() {
 
                 <div>
                   <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">TamaÃ±o mÃ¡ximo de papel</span>
+                    <span className="text-white/80">Tamaño máximo de papel</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-6 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a mÃ¡quina)</span>
+                        <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a máquina)</span>
                         <input type="number" className="inp w-full min-w-0"
                           value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
@@ -184,7 +180,7 @@ export default function MachinesAdmin() {
 
                 <div>
                   <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Costos de preparaciÃ³n (UYU)</span>
+                    <span className="text-white/80">Costos de preparación (UYU)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Postura</span>
@@ -202,7 +198,7 @@ export default function MachinesAdmin() {
 
                 <div>
                   <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">MÃ¡rgenes (mm)</span>
+                    <span className="text-white/80">Márgenes (mm)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Pinza</span>
@@ -215,7 +211,7 @@ export default function MachinesAdmin() {
                           value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                       <div className="col-span-4 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">MÃ¡rgenes</span>
+                        <span className="text-xs text-white/70 whitespace-nowrap">Márgenes</span>
                         <input type="number" className="inp w-full min-w-0"
                           value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
@@ -224,7 +220,6 @@ export default function MachinesAdmin() {
                 </div>
               </div>
 
-              {/* Derecha  Costos por formato */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white/80 font-semibold">Costos por formato</span>
@@ -247,11 +242,10 @@ export default function MachinesAdmin() {
                     <div key={bi} className="rounded-lg border border-black/60 bg-white text-black p-2">
                       {!m._edit ? (
                         <div className="text-sm truncate">
-                          {(b.constraints?.maxLen ?? "-")}{(b.constraints?.maxWid ?? "-")} mm  ${b.sheetCost?.value ?? "-"} {b.sheetCost?.unit === "per_sheet" ? "por hoja" : "por millar"}
+                          {(b.constraints?.maxLen ?? "-")}×{(b.constraints?.maxWid ?? "-")} mm — ${b.sheetCost?.value ?? "-"} {b.sheetCost?.unit === "per_sheet" ? "por hoja" : "por millar"}
                         </div>
                       ) : (
                         <>
-                          {/* 2x2: cada control = 1/2 del panel derecho ( 1/4 del card) */}
                           <div className="grid grid-cols-2 gap-2">
                             <label className="grid gap-1 text-xs min-w-0">
                               <span>Ancho (entrada)</span>

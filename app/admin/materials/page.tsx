@@ -1,145 +1,215 @@
--x-"-x-u-x-s-x-e-x- -x-c-x-l-x-i-x-e-x-n-x-t-x-"-x-;-x-
--x-i-x-m-x-p-x-o-x-r-x-t-x- -x-{-x- -x-n-x-o-x-r-x-m-x-a-x-l-x-i-x-z-x-e-x-E-x-x-x-t-x-e-x-r-x-n-x-a-x-l-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-,-x- -x-l-x-o-x-o-x-k-x-s-x-L-x-i-x-k-x-e-x-E-x-x-x-t-x-e-x-r-x-n-x-a-x-l-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x- -x-}-x- -x-f-x-r-x-o-x-m-x- -x-"-x-@-x-/-x-a-x-p-x-p-x-/-x-l-x-i-x-b-x-/-x-m-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x---x-n-x-o-x-r-x-m-x-a-x-l-x-i-x-z-x-e-x-"-x-;-x-
--x-i-x-m-x-p-x-o-x-r-x-t-x- -x-{-x- -x-u-x-s-x-e-x-E-x-f-x-f-x-e-x-c-x-t-x-,-x- -x-u-x-s-x-e-x-M-x-e-x-m-x-o-x-,-x- -x-u-x-s-x-e-x-S-x-t-x-a-x-t-x-e-x- -x-}-x- -x-f-x-r-x-o-x-m-x- -x-"-x-r-x-e-x-a-x-c-x-t-x-"-x-;-x-
--x-
--x-t-x-y-x-p-x-e-x- -x-S-x-i-x-z-x-e-x- -x-=-x- -x-{-x- -x-w-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-;-x- -x-l-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-;-x- -x-s-x-u-x-p-x-p-x-l-x-i-x-e-x-r-x-?-x-:-x-s-x-t-x-r-x-i-x-n-x-g-x-;-x- -x-u-x-s-x-d-x-P-x-e-x-r-x-T-x-o-x-n-x-?-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-|-x-n-x-u-x-l-x-l-x-;-x- -x-p-x-r-x-e-x-f-x-e-x-r-x-r-x-e-x-d-x-?-x-:-x-b-x-o-x-o-x-l-x-e-x-a-x-n-x- -x-}-x-;-x-
--x-t-x-y-x-p-x-e-x- -x-G-x-r-x-a-x-m-x- -x-=-x- -x-{-x- -x-g-x-r-x-a-x-m-x-s-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-[-x-]-x-;-x- -x-s-x-i-x-z-x-e-x-s-x-:-x- -x-S-x-i-x-z-x-e-x-[-x-]-x-;-x- -x-i-x-n-x-d-x-e-x-x-x-H-x-i-x-n-x-t-x-?-x-:-x- -x-n-x-u-x-m-x-b-x-e-x-r-x-|-x-n-x-u-x-l-x-l-x- -x-}-x-;-x-
--x-t-x-y-x-p-x-e-x- -x-M-x-a-x-t-x-T-x-y-x-p-x-e-x- -x-=-x- -x-{-x- -x-n-x-a-x-m-x-e-x-:-x-s-x-t-x-r-x-i-x-n-x-g-x-;-x- -x-g-x-r-x-a-x-m-x-s-x-:-x- -x-G-x-r-x-a-x-m-x-[-x-]-x-;-x- -x-_-x-e-x-d-x-i-x-t-x-?-x-:-x-b-x-o-x-o-x-l-x-e-x-a-x-n-x-;-x- -x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-?-x-:-x-M-x-a-x-t-x-T-x-y-x-p-x-e-x- -x-}-x-;-x-
--x-
--x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-c-x-l-x-o-x-n-x-e-x-<-x-T-x->-x-(-x-x-x-:-x-T-x-)-x-:-x-T-x- -x-{-x- -x-r-x-e-x-t-x-u-x-r-x-n-x- -x-J-x-S-x-O-x-N-x-.-x-p-x-a-x-r-x-s-x-e-x-(-x-J-x-S-x-O-x-N-x-.-x-s-x-t-x-r-x-i-x-n-x-g-x-i-x-f-x-y-x-(-x-x-x-)-x-)-x-;-x- -x-}-x-
--x-
--x-e-x-x-x-p-x-o-x-r-x-t-x- -x-d-x-e-x-f-x-a-x-u-x-l-x-t-x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-P-x-a-x-g-x-e-x-(-x-)-x-{-x-
--x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-[-x-i-x-t-x-e-x-m-x-s-x-,-x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-]-x- -x-=-x- -x-u-x-s-x-e-x-S-x-t-x-a-x-t-x-e-x-<-x-M-x-a-x-t-x-T-x-y-x-p-x-e-x-[-x-]-x->-x-(-x-[-x-]-x-)-x-;-x-
--x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-[-x-d-x-i-x-r-x-t-x-y-x-,-x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-]-x- -x-=-x- -x-u-x-s-x-e-x-S-x-t-x-a-x-t-x-e-x-(-x-f-x-a-x-l-x-s-x-e-x-)-x-;-x-
--x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-[-x-m-x-s-x-g-x-,-x- -x-s-x-e-x-t-x-M-x-s-x-g-x-]-x- -x-=-x- -x-u-x-s-x-e-x-S-x-t-x-a-x-t-x-e-x-(-x-"-x-"-x-)-x-;-x-
--x-
--x- -x- -x-/-x-/-x- -x-C-x-a-x-r-x-g-x-a-x- -x-i-x-n-x-i-x-c-x-i-x-a-x-l-x- -x-(-x-s-x-i-x- -x-t-x-u-x- -x-A-x-P-x-I-x- -x-e-x-x-x-i-x-s-x-t-x-e-x-,-x- -x-m-x-a-x-n-x-t-x-e-x-n-x-e-x-r-x-;-x- -x-s-x-i-x- -x-n-x-o-x-,-x- -x-i-x-g-x-n-x-o-x-r-x-a-x- -x-e-x-r-x-r-x-o-x-r-x-e-x-s-x-)-x-
--x- -x- -x-u-x-s-x-e-x-E-x-f-x-f-x-e-x-c-x-t-x-(-x-(-x-)-x-=-x->-x-{-x-(-x-a-x-s-x-y-x-n-x-c-x-(-x-)-x-=-x->-x-{-x-
--x- -x- -x- -x- -x-t-x-r-x-y-x-{-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-r-x- -x-=-x- -x-a-x-w-x-a-x-i-x-t-x- -x-f-x-e-x-t-x-c-x-h-x-(-x-"-x-/-x-a-x-p-x-i-x-/-x-a-x-d-x-m-x-i-x-n-x-/-x-m-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-"-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-i-x-f-x-(-x-!-x-r-x-.-x-o-x-k-x-)-x- -x-r-x-e-x-t-x-u-x-r-x-n-x-;-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-j-x- -x-=-x- -x-a-x-w-x-a-x-i-x-t-x- -x-r-x-.-x-j-x-s-x-o-x-n-x-(-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-a-x-r-x-r-x- -x-=-x- -x-A-x-r-x-r-x-a-x-y-x-.-x-i-x-s-x-A-x-r-x-r-x-a-x-y-x-(-x-j-x-?-x-.-x-i-x-t-x-e-x-m-x-s-x-)-x- -x-?-x- -x-j-x-.-x-i-x-t-x-e-x-m-x-s-x- -x-:-x- -x-[-x-]-x-;-x-
--x- -x- -x- -x- -x- -x- -x-i-x-f-x- -x-(-x-a-x-r-x-r-x-.-x-l-x-e-x-n-x-g-x-t-x-h-x-)-x-{-x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-a-x-r-x-r-x- -x-a-x-s-x- -x-M-x-a-x-t-x-T-x-y-x-p-x-e-x-[-x-]-x-)-x-;-x- -x-}-x-
--x- -x- -x- -x- -x-}-x-c-x-a-x-t-x-c-x-h-x-{-x-}-x-
--x- -x- -x-}-x-)-x-(-x-)-x-}-x-,-x-[-x-]-x-)-x-;-x-
--x-
--x- -x- -x-/-x-/-x- -x-=-x-=-x-=-x- -x-I-x-m-x-p-x-o-x-r-x-t-x-a-x-d-x-o-x-r-x- -x-r-x-o-x-b-x-u-x-s-x-t-x-o-x-:-x- -x-a-x-c-x-e-x-p-x-t-x-a-x- -x-t-x-u-x- -x-J-x-S-x-O-x-N-x- -x-e-x-x-x-t-x-e-x-r-x-n-x-o-x- -x-y-x- -x-e-x-l-x- -x-i-x-n-x-t-x-e-x-r-x-n-x-o-x- -x-=-x-=-x-=-x-
--x- -x- -x-a-x-s-x-y-x-n-x-c-x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-h-x-a-x-n-x-d-x-l-x-e-x-I-x-m-x-p-x-o-x-r-x-t-x-(-x-e-x-:-x-a-x-n-x-y-x-)-x-{-x-
--x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-f-x- -x-=-x- -x-e-x-.-x-c-x-u-x-r-x-r-x-e-x-n-x-t-x-T-x-a-x-r-x-g-x-e-x-t-x-?-x-.-x-f-x-i-x-l-x-e-x-s-x-?-x-.-x-[-x-0-x-]-x-;-x-
--x- -x- -x- -x- -x-i-x-f-x-(-x-!-x-f-x-)-x- -x-r-x-e-x-t-x-u-x-r-x-n-x-;-x-
--x- -x- -x- -x- -x-t-x-r-x-y-x-{-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-t-x-x-x-t-x- -x-=-x- -x-a-x-w-x-a-x-i-x-t-x- -x-f-x-.-x-t-x-e-x-x-x-t-x-(-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-r-x-a-x-w-x- -x-=-x- -x-J-x-S-x-O-x-N-x-.-x-p-x-a-x-r-x-s-x-e-x-(-x-t-x-x-x-t-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-l-x-e-x-t-x- -x-i-x-m-x-p-x-o-x-r-x-t-x-e-x-d-x-:-x-a-x-n-x-y-x-[-x-]-x- -x-=-x- -x-[-x-]-x-;-x-
--x-
--x- -x- -x- -x- -x- -x- -x-i-x-f-x- -x-(-x-l-x-o-x-o-x-k-x-s-x-L-x-i-x-k-x-e-x-E-x-x-x-t-x-e-x-r-x-n-x-a-x-l-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-(-x-r-x-a-x-w-x-)-x-)-x- -x-{-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-i-x-m-x-p-x-o-x-r-x-t-x-e-x-d-x- -x-=-x- -x-n-x-o-x-r-x-m-x-a-x-l-x-i-x-z-x-e-x-E-x-x-x-t-x-e-x-r-x-n-x-a-x-l-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-(-x-r-x-a-x-w-x-)-x-;-x- -x-/-x-/-x- -x-p-x-r-x-i-x-c-x-e-x-I-x-n-x-d-x-e-x-x-x- -x---x->-x- -x-u-x-s-x-d-x-P-x-e-x-r-x-T-x-o-x-n-x-,-x- -x-s-x-t-x-o-x-c-x-k-x-e-x-d-x- -x---x->-x- -x-p-x-r-x-e-x-f-x-e-x-r-x-r-x-e-x-d-x-
--x- -x- -x- -x- -x- -x- -x-}-x- -x-e-x-l-x-s-x-e-x- -x-i-x-f-x- -x-(-x-A-x-r-x-r-x-a-x-y-x-.-x-i-x-s-x-A-x-r-x-r-x-a-x-y-x-(-x-(-x-r-x-a-x-w-x- -x-a-x-s-x- -x-a-x-n-x-y-x-)-x-?-x-.-x-i-x-t-x-e-x-m-x-s-x-)-x-)-x- -x-{-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-i-x-m-x-p-x-o-x-r-x-t-x-e-x-d-x- -x-=-x- -x-(-x-r-x-a-x-w-x- -x-a-x-s-x- -x-a-x-n-x-y-x-)-x-.-x-i-x-t-x-e-x-m-x-s-x-;-x- -x-/-x-/-x- -x-f-x-o-x-r-x-m-x-a-x-t-x-o-x- -x-i-x-n-x-t-x-e-x-r-x-n-x-o-x-
--x- -x- -x- -x- -x- -x- -x-}-x- -x-e-x-l-x-s-x-e-x- -x-i-x-f-x- -x-(-x-A-x-r-x-r-x-a-x-y-x-.-x-i-x-s-x-A-x-r-x-r-x-a-x-y-x-(-x-r-x-a-x-w-x-)-x-)-x- -x-{-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-i-x-m-x-p-x-o-x-r-x-t-x-e-x-d-x- -x-=-x- -x-r-x-a-x-w-x-;-x- -x-/-x-/-x- -x-y-x-a-x- -x-n-x-o-x-r-x-m-x-a-x-l-x-i-x-z-x-a-x-d-x-o-x-
--x- -x- -x- -x- -x- -x- -x-}-x- -x-e-x-l-x-s-x-e-x- -x-{-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-t-x-h-x-r-x-o-x-w-x- -x-n-x-e-x-w-x- -x-E-x-r-x-r-x-o-x-r-x-(-x-"-x-E-x-s-x-t-x-r-x-u-x-c-x-t-x-u-x-r-x-a-x- -x-n-x-o-x- -x-r-x-e-x-c-x-o-x-n-x-o-x-c-x-i-x-d-x-a-x-"-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-}-x-
--x-
--x- -x- -x- -x- -x- -x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-(-x-i-x-m-x-p-x-o-x-r-x-t-x-e-x-d-x- -x-a-x-s-x- -x-M-x-a-x-t-x-T-x-y-x-p-x-e-x-[-x-]-x-)-x-.-x-m-x-a-x-p-x-(-x-t-x-=-x->-x-(-x-{-x-.-x-.-x-.-x-t-x-,-x- -x-_-x-e-x-d-x-i-x-t-x-:-x-f-x-a-x-l-x-s-x-e-x-,-x- -x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-:-x-u-x-n-x-d-x-e-x-f-x-i-x-n-x-e-x-d-x-}-x-)-x-)-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-(-x-t-x-r-x-u-x-e-x-)-x-;-x- -x-s-x-e-x-t-x-M-x-s-x-g-x-(-x-`-x-I-x-m-x-p-x-o-x-r-x-t-x-a-x-d-x-o-x-s-x- -x-$-x-{-x-i-x-m-x-p-x-o-x-r-x-t-x-e-x-d-x-.-x-l-x-e-x-n-x-g-x-t-x-h-x-}-x- -x-t-x-i-x-p-x-o-x-s-x- -x-(-x-s-x-i-x-n-x- -x-g-x-u-x-a-x-r-x-d-x-a-x-r-x-)-x-`-x-)-x-;-x-
--x- -x- -x- -x- -x-}-x- -x-c-x-a-x-t-x-c-x-h-x-(-x-e-x-r-x-r-x-:-x-a-x-n-x-y-x-)-x-{-x-
--x- -x- -x- -x- -x- -x- -x-a-x-l-x-e-x-r-x-t-x-(-x-"-x-N-x-o-x- -x-s-x-e-x- -x-p-x-u-x-d-x-o-x- -x-i-x-m-x-p-x-o-x-r-x-t-x-a-x-r-x- -x-e-x-l-x- -x-J-x-S-x-O-x-N-x-:-x- -x-"-x- -x-+-x- -x-(-x-e-x-r-x-r-x-?-x-.-x-m-x-e-x-s-x-s-x-a-x-g-x-e-x- -x-|-x-|-x- -x-"-x-e-x-r-x-r-x-o-x-r-x-"-x-)-x-)-x-;-x-
--x- -x- -x- -x- -x-}-x-
--x- -x- -x- -x- -x-t-x-r-x-y-x- -x-{-x- -x-e-x-.-x-c-x-u-x-r-x-r-x-e-x-n-x-t-x-T-x-a-x-r-x-g-x-e-x-t-x-.-x-v-x-a-x-l-x-u-x-e-x- -x-=-x- -x-"-x-"-x-;-x- -x-}-x- -x-c-x-a-x-t-x-c-x-h-x- -x-{-x-}-x-
--x- -x- -x-}-x-
--x-
--x- -x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-a-x-d-x-d-x-T-x-y-x-p-x-e-x-(-x-)-x-{-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-p-x-=-x->-x-[-x- -x-{-x- -x-n-x-a-x-m-x-e-x-:-x-"-x-N-x-u-x-e-x-v-x-o-x- -x-t-x-i-x-p-x-o-x-"-x-,-x- -x-g-x-r-x-a-x-m-x-s-x-:-x-[-x-{-x- -x-g-x-r-x-a-x-m-x-s-x-:-x-[-x-8-x-0-x-]-x-,-x- -x-s-x-i-x-z-x-e-x-s-x-:-x-[-x-]-x- -x-}-x-]-x-,-x- -x-_-x-e-x-d-x-i-x-t-x-:-x-t-x-r-x-u-x-e-x- -x-}-x-,-x- -x-.-x-.-x-.-x-p-x- -x-]-x-)-x-;-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-(-x-t-x-r-x-u-x-e-x-)-x-;-x-
--x- -x- -x-}-x-
--x- -x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-s-x-t-x-a-x-r-x-t-x-E-x-d-x-i-x-t-x-(-x-i-x-x-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-)-x-{-x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-p-x-=-x->-x-p-x-.-x-m-x-a-x-p-x-(-x-(-x-t-x-,-x-i-x-)-x-=-x->-x- -x-i-x-=-x-=-x-=-x-i-x-x-x- -x-?-x- -x-(-x-{-x-.-x-.-x-.-x-t-x-,-x- -x-_-x-e-x-d-x-i-x-t-x-:-x-t-x-r-x-u-x-e-x-,-x- -x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-:-x-c-x-l-x-o-x-n-x-e-x-(-x-t-x-)-x-}-x-)-x- -x-:-x- -x-t-x-)-x-)-x-;-x- -x-}-x-
--x- -x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-c-x-a-x-n-x-c-x-e-x-l-x-E-x-d-x-i-x-t-x-(-x-i-x-x-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-)-x-{-x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-p-x-=-x->-x-p-x-.-x-m-x-a-x-p-x-(-x-(-x-t-x-,-x-i-x-)-x-=-x->-x- -x-i-x-=-x-=-x-=-x-i-x-x-x- -x-?-x- -x-(-x-t-x-.-x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x- -x-?-x- -x-{-x-.-x-.-x-.-x-t-x-.-x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-,-x- -x-_-x-e-x-d-x-i-x-t-x-:-x-f-x-a-x-l-x-s-x-e-x-,-x- -x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-:-x-u-x-n-x-d-x-e-x-f-x-i-x-n-x-e-x-d-x-}-x- -x-:-x- -x-{-x-.-x-.-x-.-x-t-x-,-x- -x-_-x-e-x-d-x-i-x-t-x-:-x-f-x-a-x-l-x-s-x-e-x-}-x-)-x- -x-:-x- -x-t-x-)-x-)-x-;-x- -x-}-x-
--x- -x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-s-x-a-x-v-x-e-x-E-x-d-x-i-x-t-x-(-x-i-x-x-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-)-x-{-x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-p-x-=-x->-x-p-x-.-x-m-x-a-x-p-x-(-x-(-x-t-x-,-x-i-x-)-x-=-x->-x- -x-i-x-=-x-=-x-=-x-i-x-x-x- -x-?-x- -x-(-x-{-x-.-x-.-x-.-x-t-x-,-x- -x-_-x-e-x-d-x-i-x-t-x-:-x-f-x-a-x-l-x-s-x-e-x-,-x- -x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-:-x-u-x-n-x-d-x-e-x-f-x-i-x-n-x-e-x-d-x-}-x-)-x- -x-:-x- -x-t-x-)-x-)-x-;-x- -x-}-x-
--x- -x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-r-x-m-x-T-x-y-x-p-x-e-x-(-x-i-x-x-x-:-x-n-x-u-x-m-x-b-x-e-x-r-x-)-x-{-x-
--x- -x- -x- -x- -x-i-x-f-x-(-x-!-x-c-x-o-x-n-x-f-x-i-x-r-x-m-x-(-x-"-x-x-x-‚-x---x-¿-x-E-x-l-x-i-x-m-x-i-x-n-x-a-x-r-x- -x-e-x-s-x-t-x-e-x- -x-t-x-i-x-p-x-o-x- -x-d-x-e-x- -x-p-x-a-x-p-x-e-x-l-x- -x-y-x- -x-t-x-o-x-d-x-o-x-s-x- -x-s-x-u-x-s-x- -x-g-x-r-x-a-x-m-x-a-x-j-x-e-x-s-x-?-x-"-x-)-x-)-x- -x-r-x-e-x-t-x-u-x-r-x-n-x-;-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-p-x-=-x->-x-p-x-.-x-f-x-i-x-l-x-t-x-e-x-r-x-(-x-(-x-_-x-,-x-i-x-)-x-=-x->-x-i-x-!-x-=-x-=-x-i-x-x-x-)-x-)-x-;-x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-(-x-t-x-r-x-u-x-e-x-)-x-;-x-
--x- -x- -x-}-x-
--x-
--x- -x- -x-a-x-s-x-y-x-n-x-c-x- -x-f-x-u-x-n-x-c-x-t-x-i-x-o-x-n-x- -x-s-x-a-x-v-x-e-x-A-x-l-x-l-x-(-x-)-x-{-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-M-x-s-x-g-x-(-x-"-x-G-x-u-x-a-x-r-x-d-x-a-x-n-x-d-x-o-x-"-x-)-x-;-x-
--x- -x- -x- -x- -x-t-x-r-x-y-x-{-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-p-x-a-x-y-x-l-x-o-x-a-x-d-x- -x-=-x- -x-{-x- -x-i-x-t-x-e-x-m-x-s-x-:-x- -x-i-x-t-x-e-x-m-x-s-x-.-x-m-x-a-x-p-x-(-x-(-x-{-x-_-x-e-x-d-x-i-x-t-x-,-x-_-x-s-x-n-x-a-x-p-x-s-x-h-x-o-x-t-x-,-x- -x-.-x-.-x-.-x-t-x-}-x-)-x-=-x->-x-t-x-)-x- -x-}-x-;-x-
--x- -x- -x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-r-x- -x-=-x- -x-a-x-w-x-a-x-i-x-t-x- -x-f-x-e-x-t-x-c-x-h-x-(-x-"-x-/-x-a-x-p-x-i-x-/-x-a-x-d-x-m-x-i-x-n-x-/-x-m-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-"-x-,-x- -x-{-x- -x-m-x-e-x-t-x-h-x-o-x-d-x-:-x-"-x-P-x-U-x-T-x-"-x-,-x- -x-h-x-e-x-a-x-d-x-e-x-r-x-s-x-:-x-{-x- -x-"-x-C-x-o-x-n-x-t-x-e-x-n-x-t-x---x-T-x-y-x-p-x-e-x-"-x-:-x-"-x-a-x-p-x-p-x-l-x-i-x-c-x-a-x-t-x-i-x-o-x-n-x-/-x-j-x-s-x-o-x-n-x-"-x- -x-}-x-,-x- -x-b-x-o-x-d-x-y-x-:-x- -x-J-x-S-x-O-x-N-x-.-x-s-x-t-x-r-x-i-x-n-x-g-x-i-x-f-x-y-x-(-x-p-x-a-x-y-x-l-x-o-x-a-x-d-x-)-x- -x-}-x-)-x-;-x-
--x- -x- -x- -x- -x- -x- -x-i-x-f-x- -x-(-x-!-x-r-x-.-x-o-x-k-x-)-x-{-x- -x-c-x-o-x-n-x-s-x-t-x- -x-j-x- -x-=-x- -x-a-x-w-x-a-x-i-x-t-x- -x-r-x-.-x-j-x-s-x-o-x-n-x-(-x-)-x-.-x-c-x-a-x-t-x-c-x-h-x-(-x-(-x-)-x-=-x->-x-n-x-u-x-l-x-l-x-)-x-;-x- -x-t-x-h-x-r-x-o-x-w-x- -x-n-x-e-x-w-x- -x-E-x-r-x-r-x-o-x-r-x-(-x-j-x-?-x-.-x-e-x-r-x-r-x-o-x-r-x- -x-|-x-|-x- -x-"-x-f-x-a-x-l-x-l-x-x-x-ƒ-x---x-³-x- -x-e-x-l-x- -x-g-x-u-x-a-x-r-x-d-x-a-x-d-x-o-x-"-x-)-x-;-x- -x-}-x-
--x- -x- -x- -x- -x- -x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-(-x-f-x-a-x-l-x-s-x-e-x-)-x-;-x- -x-s-x-e-x-t-x-M-x-s-x-g-x-(-x-"-x-G-x-u-x-a-x-r-x-d-x-a-x-d-x-o-x- -x-O-x-K-x-"-x-)-x-;-x-
--x- -x- -x- -x- -x-}-x-c-x-a-x-t-x-c-x-h-x-(-x-e-x-:-x-a-x-n-x-y-x-)-x-{-x- -x-s-x-e-x-t-x-M-x-s-x-g-x-(-x-"-x-N-x-o-x- -x-s-x-e-x- -x-p-x-u-x-d-x-o-x- -x-g-x-u-x-a-x-r-x-d-x-a-x-r-x-:-x- -x-"-x-+-x-(-x-e-x-?-x-.-x-m-x-e-x-s-x-s-x-a-x-g-x-e-x-|-x-|-x-"-x-e-x-r-x-r-x-o-x-r-x-"-x-)-x-)-x-;-x- -x-}-x-
--x- -x- -x-}-x-
--x-
--x- -x- -x-r-x-e-x-t-x-u-x-r-x-n-x- -x-(-x-
--x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-s-x-p-x-a-x-c-x-e-x---x-y-x---x-5-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x-<-x-h-x-e-x-a-x-d-x-e-x-r-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-f-x-l-x-e-x-x-x- -x-f-x-l-x-e-x-x-x---x-w-x-r-x-a-x-p-x- -x-i-x-t-x-e-x-m-x-s-x---x-c-x-e-x-n-x-t-x-e-x-r-x- -x-g-x-a-x-p-x---x-3-x-"-x->-x--x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-a-x- -x-h-x-r-x-e-x-f-x-=-x-"-x-/-x-a-x-d-x-m-x-i-x-n-x-"-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-b-x-t-x-n-x- -x-b-x-t-x-n-x---x-g-x-h-x-o-x-s-x-t-x- -x-g-x-a-x-p-x---x-2-x-"-x->-x- -x-V-x-o-x-l-x-v-x-e-x-r-x-<-x-/-x-a-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-h-x-1-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-t-x-e-x-x-x-t-x---x-2-x-x-x-l-x- -x-f-x-o-x-n-x-t-x---x-b-x-o-x-l-x-d-x-"-x->-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-e-x-s-x-<-x-/-x-h-x-1-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-i-x-n-x-p-x-u-x-t-x- -x-t-x-y-x-p-x-e-x-=-x-"-x-f-x-i-x-l-x-e-x-"-x- -x-a-x-c-x-c-x-e-x-p-x-t-x-=-x-"-x-a-x-p-x-p-x-l-x-i-x-c-x-a-x-t-x-i-x-o-x-n-x-/-x-j-x-s-x-o-x-n-x-"-x- -x-o-x-n-x-C-x-h-x-a-x-n-x-g-x-e-x-=-x-{-x- -x-a-x-s-x-y-x-n-x-c-x- -x-(-x-e-x-)-x-=-x->-x-{-x-
--x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-f-x- -x-=-x- -x-e-x-.-x-c-x-u-x-r-x-r-x-e-x-n-x-t-x-T-x-a-x-r-x-g-x-e-x-t-x-.-x-f-x-i-x-l-x-e-x-s-x-?-x-.-x-[-x-0-x-]-x-;-x-
--x- -x- -x-i-x-f-x-(-x-!-x-f-x-)-x- -x-r-x-e-x-t-x-u-x-r-x-n-x-;-x-
--x- -x- -x-t-x-r-x-y-x-{-x-
--x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-t-x-x-x-t-x- -x-=-x- -x-a-x-w-x-a-x-i-x-t-x- -x-f-x-.-x-t-x-e-x-x-x-t-x-(-x-)-x-;-x-
--x- -x- -x- -x- -x-c-x-o-x-n-x-s-x-t-x- -x-r-x-a-x-w-x- -x-=-x- -x-J-x-S-x-O-x-N-x-.-x-p-x-a-x-r-x-s-x-e-x-(-x-t-x-x-x-t-x-)-x-;-x-
--x- -x- -x- -x- -x-l-x-e-x-t-x- -x-i-x-t-x-e-x-m-x-s-x-:-x-a-x-n-x-y-x-[-x-]-x- -x-=-x- -x-[-x-]-x-;-x-
--x- -x- -x- -x- -x-i-x-f-x- -x-(-x-l-x-o-x-o-x-k-x-s-x-L-x-i-x-k-x-e-x-E-x-x-x-t-x-e-x-r-x-n-x-a-x-l-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-(-x-r-x-a-x-w-x-)-x-)-x- -x-i-x-t-x-e-x-m-x-s-x- -x-=-x- -x-n-x-o-x-r-x-m-x-a-x-l-x-i-x-z-x-e-x-E-x-x-x-t-x-e-x-r-x-n-x-a-x-l-x-M-x-a-x-t-x-e-x-r-x-i-x-a-x-l-x-s-x-(-x-r-x-a-x-w-x-)-x-;-x-
--x- -x- -x- -x- -x-e-x-l-x-s-x-e-x- -x-i-x-f-x- -x-(-x-A-x-r-x-r-x-a-x-y-x-.-x-i-x-s-x-A-x-r-x-r-x-a-x-y-x-(-x-r-x-a-x-w-x-?-x-.-x-i-x-t-x-e-x-m-x-s-x-)-x-)-x- -x-i-x-t-x-e-x-m-x-s-x- -x-=-x- -x-r-x-a-x-w-x-.-x-i-x-t-x-e-x-m-x-s-x-;-x-
--x- -x- -x- -x- -x-e-x-l-x-s-x-e-x- -x-i-x-f-x- -x-(-x-A-x-r-x-r-x-a-x-y-x-.-x-i-x-s-x-A-x-r-x-r-x-a-x-y-x-(-x-r-x-a-x-w-x-)-x-)-x- -x-i-x-t-x-e-x-m-x-s-x- -x-=-x- -x-r-x-a-x-w-x-;-x-
--x- -x- -x- -x- -x-e-x-l-x-s-x-e-x- -x-t-x-h-x-r-x-o-x-w-x- -x-n-x-e-x-w-x- -x-E-x-r-x-r-x-o-x-r-x-(-x-"-x-E-x-s-x-t-x-r-x-u-x-c-x-t-x-u-x-r-x-a-x- -x-n-x-o-x- -x-r-x-e-x-c-x-o-x-n-x-o-x-c-x-i-x-d-x-a-x-"-x-)-x-;-x-
--x- -x- -x- -x- -x-/-x-/-x- -x-@-x-t-x-s-x---x-i-x-g-x-n-x-o-x-r-x-e-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-?-x-.-x-(-x-i-x-t-x-e-x-m-x-s-x-)-x-;-x-
--x- -x- -x- -x- -x-/-x-/-x- -x-@-x-t-x-s-x---x-i-x-g-x-n-x-o-x-r-x-e-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-?-x-.-x-(-x-t-x-r-x-u-x-e-x-)-x-;-x-
--x- -x- -x- -x- -x-/-x-/-x- -x-@-x-t-x-s-x---x-i-x-g-x-n-x-o-x-r-x-e-x-
--x- -x- -x- -x- -x-s-x-e-x-t-x-M-x-s-x-g-x-?-x-.-x-(-x-`-x-I-x-m-x-p-x-o-x-r-x-t-x-a-x-d-x-o-x-s-x- -x-$-x-{-x-i-x-t-x-e-x-m-x-s-x-.-x-l-x-e-x-n-x-g-x-t-x-h-x-}-x- -x-t-x-i-x-p-x-o-x-s-x- -x-(-x-s-x-i-x-n-x- -x-g-x-u-x-a-x-r-x-d-x-a-x-r-x-)-x-`-x-)-x-;-x-
--x- -x- -x-}-x-c-x-a-x-t-x-c-x-h-x-(-x-e-x-r-x-r-x-:-x-a-x-n-x-y-x-)-x-{-x- -x-a-x-l-x-e-x-r-x-t-x-(-x-"-x-N-x-o-x- -x-s-x-e-x- -x-p-x-u-x-d-x-o-x- -x-i-x-m-x-p-x-o-x-r-x-t-x-a-x-r-x- -x-e-x-l-x- -x-J-x-S-x-O-x-N-x-:-x- -x-"-x- -x-+-x- -x-(-x-e-x-r-x-r-x-?-x-.-x-m-x-e-x-s-x-s-x-a-x-g-x-e-x-|-x-|-x-"-x-e-x-r-x-r-x-o-x-r-x-"-x-)-x-)-x-;-x- -x-}-x-
--x- -x- -x-e-x-.-x-c-x-u-x-r-x-r-x-e-x-n-x-t-x-T-x-a-x-r-x-g-x-e-x-t-x-.-x-v-x-a-x-l-x-u-x-e-x- -x-=-x- -x-"-x-"-x-;-x-
--x-}-x- -x-}-x- -x-/-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-b-x-u-x-t-x-t-x-o-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-3-x- -x-p-x-y-x---x-2-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x- -x-b-x-g-x---x-w-x-h-x-i-x-t-x-e-x- -x-t-x-e-x-x-x-t-x---x-b-x-l-x-a-x-c-x-k-x-"-x- -x-o-x-n-x-C-x-l-x-i-x-c-x-k-x-=-x-{-x-a-x-d-x-d-x-T-x-y-x-p-x-e-x-}-x->-x-A-x-g-x-r-x-e-x-g-x-a-x-r-x- -x-t-x-i-x-p-x-o-x-<-x-/-x-b-x-u-x-t-x-t-x-o-x-n-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-b-x-u-x-t-x-t-x-o-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-3-x- -x-p-x-y-x---x-2-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x- -x-b-x-g-x---x-w-x-h-x-i-x-t-x-e-x- -x-t-x-e-x-x-x-t-x---x-b-x-l-x-a-x-c-x-k-x-"-x- -x-o-x-n-x-C-x-l-x-i-x-c-x-k-x-=-x-{-x-s-x-a-x-v-x-e-x-A-x-l-x-l-x-}-x- -x-d-x-i-x-s-x-a-x-b-x-l-x-e-x-d-x-=-x-{-x-!-x-d-x-i-x-r-x-t-x-y-x-}-x->-x-G-x-u-x-a-x-r-x-d-x-a-x-r-x- -x-t-x-o-x-d-x-o-x-<-x-/-x-b-x-u-x-t-x-t-x-o-x-n-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-s-x-p-x-a-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-o-x-p-x-a-x-c-x-i-x-t-x-y-x---x-8-x-0-x-"-x->-x-{-x-m-x-s-x-g-x-}-x-<-x-/-x-s-x-p-x-a-x-n-x->-x-
--x- -x- -x- -x- -x- -x- -x-<-x-/-x-h-x-e-x-a-x-d-x-e-x-r-x->-x-
--x-
--x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-g-x-r-x-i-x-d-x- -x-g-x-r-x-i-x-d-x---x-c-x-o-x-l-x-s-x---x-1-x- -x-m-x-d-x-:-x-g-x-r-x-i-x-d-x---x-c-x-o-x-l-x-s-x---x-2-x- -x-g-x-a-x-p-x---x-4-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-i-x-t-x-e-x-m-x-s-x-.-x-m-x-a-x-p-x-(-x-(-x-t-x-,-x-i-x-x-x-)-x-=-x->-x-(-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-k-x-e-x-y-x-=-x-{-x-i-x-x-x-}-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-r-x-o-x-u-x-n-x-d-x-e-x-d-x---x-x-x-l-x- -x-b-x-o-x-r-x-d-x-e-x-r-x- -x-p-x---x-4-x- -x-s-x-p-x-a-x-c-x-e-x---x-y-x---x-3-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-f-x-l-x-e-x-x-x- -x-i-x-t-x-e-x-m-x-s-x---x-c-x-e-x-n-x-t-x-e-x-r-x- -x-g-x-a-x-p-x---x-2-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-t-x-.-x-_-x-e-x-d-x-i-x-t-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-?-x- -x-<-x-i-x-n-x-p-x-u-x-t-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-2-x- -x-p-x-y-x---x-1-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x- -x-b-x-g-x---x-w-x-h-x-i-x-t-x-e-x-/-x-1-x-0-x- -x-b-x-o-x-r-x-d-x-e-x-r-x-"-x- -x-v-x-a-x-l-x-u-x-e-x-=-x-{-x-t-x-.-x-n-x-a-x-m-x-e-x-}-x- -x-o-x-n-x-C-x-h-x-a-x-n-x-g-x-e-x-=-x-{-x-e-x-=-x->-x-{-x-c-x-o-x-n-x-s-x-t-x- -x-v-x-=-x-e-x-.-x-t-x-a-x-r-x-g-x-e-x-t-x-.-x-v-x-a-x-l-x-u-x-e-x-;-x- -x-s-x-e-x-t-x-I-x-t-x-e-x-m-x-s-x-(-x-p-x-=-x->-x-p-x-.-x-m-x-a-x-p-x-(-x-(-x-x-x-,-x-i-x-)-x-=-x->-x-i-x-=-x-=-x-=-x-i-x-x-x-?-x-{-x-.-x-.-x-.-x-x-x-,-x-n-x-a-x-m-x-e-x-:-x-v-x-}-x-:-x-x-x-)-x-)-x-;-x- -x-s-x-e-x-t-x-D-x-i-x-r-x-t-x-y-x-(-x-t-x-r-x-u-x-e-x-)-x-;-x-}-x-}-x- -x-/-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-:-x- -x-<-x-h-x-2-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-f-x-o-x-n-x-t-x---x-s-x-e-x-m-x-i-x-b-x-o-x-l-x-d-x-"-x->-x-{-x-t-x-.-x-n-x-a-x-m-x-e-x-}-x-<-x-/-x-h-x-2-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-m-x-l-x---x-a-x-u-x-t-x-o-x- -x-f-x-l-x-e-x-x-x- -x-g-x-a-x-p-x---x-2-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-!-x-t-x-.-x-_-x-e-x-d-x-i-x-t-x- -x-&-x-&-x- -x-<-x-b-x-u-x-t-x-t-x-o-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-2-x- -x-p-x-y-x---x-1-x- -x-b-x-o-x-r-x-d-x-e-x-r-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x-"-x- -x-o-x-n-x-C-x-l-x-i-x-c-x-k-x-=-x-{-x-(-x-)-x-=-x->-x-s-x-t-x-a-x-r-x-t-x-E-x-d-x-i-x-t-x-(-x-i-x-x-x-)-x-}-x->-x-x-x-¢-x-Å-x-“-x---x--x-x-x-¯-x---x-¸-x---x--x-<-x-/-x-b-x-u-x-t-x-t-x-o-x-n-x->-x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-t-x-.-x-_-x-e-x-d-x-i-x-t-x- -x-&-x-&-x- -x-<-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-b-x-u-x-t-x-t-x-o-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-2-x- -x-p-x-y-x---x-1-x- -x-b-x-o-x-r-x-d-x-e-x-r-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x-"-x- -x-o-x-n-x-C-x-l-x-i-x-c-x-k-x-=-x-{-x-(-x-)-x-=-x->-x-s-x-a-x-v-x-e-x-E-x-d-x-i-x-t-x-(-x-i-x-x-x-)-x-}-x->-x-x-x-¢-x---x-¬-x---x-€-x- -x-x-x-¯-x---x-¸-x---x--x-<-x-/-x-b-x-u-x-t-x-t-x-o-x-n-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-b-x-u-x-t-x-t-x-o-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-2-x- -x-p-x-y-x---x-1-x- -x-b-x-o-x-r-x-d-x-e-x-r-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x-"-x- -x-o-x-n-x-C-x-l-x-i-x-c-x-k-x-=-x-{-x-(-x-)-x-=-x->-x-c-x-a-x-n-x-c-x-e-x-l-x-E-x-d-x-i-x-t-x-(-x-i-x-x-x-)-x-}-x->-x-x-x-°-x-Å-x-¸-x---x-€-x--x---x-€-x-ž-x-<-x-/-x-b-x-u-x-t-x-t-x-o-x-n-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-b-x-u-x-t-x-t-x-o-x-n-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-p-x-x-x---x-2-x- -x-p-x-y-x---x-1-x- -x-b-x-o-x-r-x-d-x-e-x-r-x- -x-r-x-o-x-u-x-n-x-d-x-e-x-d-x-"-x- -x-o-x-n-x-C-x-l-x-i-x-c-x-k-x-=-x-{-x-(-x-)-x-=-x->-x-r-x-m-x-T-x-y-x-p-x-e-x-(-x-i-x-x-x-)-x-}-x->-x-x-x-°-x-Å-x-¸-x---x-€-x-”-x---x-€-x-˜-x-x-x-¯-x---x-¸-x---x--x-<-x-/-x-b-x-u-x-t-x-t-x-o-x-n-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x->-x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-(-x-t-x-.-x-g-x-r-x-a-x-m-x-s-x-|-x-|-x-[-x-]-x-)-x-.-x-m-x-a-x-p-x-(-x-(-x-g-x-,-x- -x-g-x-x-x-)-x-=-x->-x-(-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-k-x-e-x-y-x-=-x-{-x-g-x-x-x-}-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-r-x-o-x-u-x-n-x-d-x-e-x-d-x---x-m-x-d-x- -x-b-x-g-x---x-w-x-h-x-i-x-t-x-e-x-/-x-5-x- -x-p-x---x-3-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-t-x-e-x-x-x-t-x---x-s-x-m-x- -x-o-x-p-x-a-x-c-x-i-x-t-x-y-x---x-8-x-0-x-"-x->-x-G-x-r-x-a-x-m-x-a-x-j-x-e-x-s-x-:-x- -x-{-x-(-x-g-x-.-x-g-x-r-x-a-x-m-x-s-x-|-x-|-x-[-x-]-x-)-x-.-x-j-x-o-x-i-x-n-x-(-x-"-x-,-x- -x-"-x-)-x-}-x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-m-x-t-x---x-2-x- -x-s-x-p-x-a-x-c-x-e-x---x-y-x---x-1-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-(-x-g-x-.-x-s-x-i-x-z-x-e-x-s-x-|-x-|-x-[-x-]-x-)-x-.-x-m-x-a-x-p-x-(-x-(-x-s-x-,-x- -x-s-x-x-x-)-x-=-x->-x-(-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-d-x-i-x-v-x- -x-k-x-e-x-y-x-=-x-{-x-s-x-x-x-}-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-t-x-e-x-x-x-t-x---x-s-x-m-x-"-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-s-x-.-x-w-x-}-x- -x-x-x-ƒ-x---x-€-x-”-x- -x-{-x-s-x-.-x-l-x-}-x- -x-x-x-¢-x---x-‚-x-¬-x---x-€-x--x- -x-{-x-s-x-.-x-s-x-u-x-p-x-p-x-l-x-i-x-e-x-r-x-|-x-|-x-"-x-P-x-r-x-o-x-v-x-e-x-e-x-d-x-o-x-r-x-?-x-"-x-}-x- -x-x-x-¢-x---x-‚-x-¬-x---x-€-x--x- -x-{-x-s-x-.-x-u-x-s-x-d-x-P-x-e-x-r-x-T-x-o-x-n-x-!-x-=-x-n-x-u-x-l-x-l-x-?-x-`-x-U-x-S-x-D-x-/-x-T-x-o-x-n-x- -x-$-x-{-x-s-x-.-x-u-x-s-x-d-x-P-x-e-x-r-x-T-x-o-x-n-x-}-x-`-x-:-x-"-x-U-x-S-x-D-x-/-x-T-x-o-x-n-x-?-x-"-x-}-x- -x-{-x-s-x-.-x-p-x-r-x-e-x-f-x-e-x-r-x-r-x-e-x-d-x-?-x-"-x-(-x-p-x-r-x-e-x-f-x-e-x-r-x-i-x-d-x-o-x-)-x-"-x-:-x-"-x-"-x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-)-x-)-x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-{-x-(-x-!-x-g-x-.-x-s-x-i-x-z-x-e-x-s-x- -x-|-x-|-x- -x-g-x-.-x-s-x-i-x-z-x-e-x-s-x-.-x-l-x-e-x-n-x-g-x-t-x-h-x-=-x-=-x-=-x-0-x-)-x- -x-&-x-&-x- -x-<-x-d-x-i-x-v-x- -x-c-x-l-x-a-x-s-x-s-x-N-x-a-x-m-x-e-x-=-x-"-x-t-x-e-x-x-x-t-x---x-s-x-m-x- -x-o-x-p-x-a-x-c-x-i-x-t-x-y-x---x-7-x-0-x-"-x->-x-S-x-i-x-n-x- -x-t-x-a-x-m-x-a-x-x-x-ƒ-x---x-±-x-o-x-s-x- -x-c-x-a-x-r-x-g-x-a-x-d-x-o-x-s-x-.-x-<-x-/-x-d-x-i-x-v-x->-x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-)-x-)-x-}-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x- -x- -x- -x- -x-)-x-)-x-}-x-
--x- -x- -x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x- -x- -x-<-x-/-x-d-x-i-x-v-x->-x-
--x- -x- -x-)-x-;-x-
--x-}-x-
--x--x-
--x--x-
--x-
+/* app/admin/materials/page.tsx */
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, Pencil, RotateCcw, Upload } from "lucide-react";
+
+type SizeRow = { length_mm: number; width_mm: number; supplier?: string; usd_per_ton?: number; };
+type Grade = { grams: number[]; sizes: SizeRow[]; };
+type MaterialType = { id?: string; name: string; grades: Grade[]; _edit?: boolean; _snapshot?: MaterialType; };
+
+const toNum = (s:string)=>{ const n = Number(s); return Number.isFinite(n) ? n : null; };
+
+// Helper para agrupar gramajes con tamaños idénticos
+function groupEquivalentGrades(grades: any[]): Grade[] {
+  const bySignature: Record<string, number[]> = {};
+  const sizesBySignature: Record<string, SizeRow[]> = {};
+  const keyForSizes = (sizes: SizeRow[]) => (sizes||[]).map(s => `${s.length_mm}x${s.width_mm}:${s.supplier}:${s.usd_per_ton}`).sort().join('|');
+
+  (grades||[]).forEach(g => {
+    const sig = keyForSizes(g.sizes || []);
+    if (!bySignature[sig]) bySignature[sig] = [];
+    if (!sizesBySignature[sig]) sizesBySignature[sig] = g.sizes || [];
+    bySignature[sig].push(...(Array.isArray(g.grams) ? g.grams : [g.grams]));
+  });
+
+  return Object.keys(bySignature).map(sig => ({
+    grams: Array.from(new Set(bySignature[sig])).sort((a,b)=>a-b),
+    sizes: sizesBySignature[sig],
+  }));
+}
+
+export default function MaterialsAdmin() {
+  const [items, setItems] = useState<MaterialType[]>([]);
+  const [dirty, setDirty] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [addingGram, setAddingGram] = useState<{typeIdx:number, gradeIdx:number}|null>(null);
+  const [newGramValue, setNewGramValue] = useState("");
+
+  useEffect(()=>{ (async()=>{
+    try{
+      const r = await fetch("/api/admin/materials",{cache:"no-store"});
+      if(!r.ok) return;
+      const j = await r.json();
+      setItems((j.items || []).map((t:any) => ({...t, grades: groupEquivalentGrades(t.grades)})));
+    }catch{}
+  })()},[]);
+
+  function mut(i:number, patch:Partial<MaterialType>){ setItems(p=>p.map((x,ix)=>ix===i?({...x,...patch}):x)); setDirty(true); }
+  function mutGrade(i:number, gi:number, patch:Partial<Grade>){
+    const t = items[i];
+    const grades = [...(t.grades||[])];
+    grades[gi] = {...grades[gi], ...patch};
+    mut(i,{grades});
+  }
+  function mutSize(i:number, gi:number, si:number, patch:Partial<SizeRow>){
+    const t = items[i];
+    const grades = [...(t.grades||[])];
+    const sizes = [...(grades[gi].sizes||[])];
+    sizes[si] = {...sizes[si], ...patch};
+    grades[gi] = {...grades[gi], sizes};
+    mut(i,{grades});
+  }
+
+  function addType(){ setItems(p=>[{ name:"Nuevo tipo", grades:[{ grams:[90], sizes:[] }], _edit:true }, ...p]); setDirty(true); }
+  function delType(i:number){ if(!confirm("¿Eliminar este tipo de material?")) return; setItems(p=>p.filter((_,ix)=>ix!==i)); setDirty(true); }
+  function startEditType(i:number){ mut(i,{_edit:true,_snapshot:structuredClone(items[i])}); }
+  function cancelEditType(i:number){ const snap=items[i]._snapshot; mut(i, snap? {...snap, _edit:false, _snapshot:undefined}:{_edit:false}); }
+  function saveEditType(i:number){ mut(i,{_edit:false,_snapshot:undefined}); }
+
+  function addGrade(i:number){ const t=items[i]; mut(i,{grades:[{grams:[], sizes:[]}, ...(t.grades||[])]}); }
+  function delGrade(i:number, gi:number){ const t=items[i]; mut(i,{grades:(t.grades||[]).filter((_,gx)=>gx!==gi)}); }
+  function addGramChip(typeIdx:number, gradeIdx:number, gram:number){
+      const g = items[typeIdx].grades[gradeIdx];
+      const grams = Array.from(new Set([...(g.grams||[]), gram])).sort((a,b)=>a-b);
+      mutGrade(typeIdx, gradeIdx, {grams});
+  }
+  function removeGramChip(typeIdx:number, gradeIdx:number, gram:number){
+      const g = items[typeIdx].grades[gradeIdx];
+      const grams = (g.grams||[]).filter(g => g !== gram);
+      if(grams.length === 0 && g.sizes.length > 0){
+          if(!confirm("Esto borrará el último gramaje. Se borrarán también los tamaños asociados. ¿Continuar?")){
+              return;
+          }
+          delGrade(typeIdx, gradeIdx);
+      } else {
+        mutGrade(typeIdx, gradeIdx, {grams});
+      }
+  }
+
+  function addSize(i:number, gi:number){ const g = items[i].grades[gi]; mutGrade(i,gi,{sizes:[{length_mm:0,width_mm:0,supplier:"",usd_per_ton:0}, ...(g.sizes||[])]}); }
+  function delSize(i:number, gi:number, si:number){ const g = items[i].grades[gi]; mutGrade(i,gi,{sizes:(g.sizes||[]).filter((_,sx)=>sx!==si)}); }
+
+  async function saveAll(){
+    setMsg("Guardando…");
+    try{
+      const payload = items.map(({_edit,_snapshot, ...t})=>t);
+      const r = await fetch("/api/admin/materials",{method:"PUT",headers:{'Content-Type':'application/json'}, body: JSON.stringify({items:payload})});
+      const j = await r.json();
+      if(!r.ok) throw new Error(j?.error || "Falló guardado");
+      setItems((j.items||payload)); setDirty(false); setMsg("Guardado OK");
+    }catch(e:any){ setMsg("No se pudo guardar: "+(e?.message||"error")); }
+  }
+
+  const exportHref = useMemo(()=>URL.createObjectURL(new Blob([JSON.stringify({items},null,2)],{type:'application/json'})),[items]);
+
+  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>){
+      const f=e.currentTarget.files?.[0]; if(!f) return;
+      try{
+          const raw = JSON.parse(await f.text());
+          const external = Array.isArray(raw)?raw:(Array.isArray(raw?.items)?raw.items:[]);
+          const byName: Record<string, {grams:number, sizes:SizeRow[], usd:number|null}[]> = {};
+          
+          external.forEach(row => {
+              const name = row.name || "Sin nombre";
+              if(!byName[name]) byName[name] = [];
+              byName[name].push({
+                  grams: Number(row.paperWeight || 0),
+                  sizes: (row.materialSizes||[]).map((s:any) => ({
+                      length_mm: Number(s.factorySize?.len || 0),
+                      width_mm: Number(s.factorySize?.wid || 0),
+                      supplier: "",
+                      usd_per_ton: Number(row.priceIndex || 0),
+                      preferred: !!s.stocked
+                  })),
+                  usd: Number(row.priceIndex || 0)
+              });
+          });
+
+          const grouped: MaterialType[] = Object.keys(byName).map(name => {
+              return {
+                  name,
+                  grades: groupEquivalentGrades(byName[name].map(g => ({grams: [g.grams], sizes: g.sizes})))
+              };
+          });
+
+          setItems(grouped);
+          setDirty(true);
+          setMsg(`Importados ${grouped.length} tipos de papel.`);
+      }catch(err:any){ alert("JSON inválido: "+err.message); }
+      e.currentTarget.value="";
+  }
+
+  return (
+    <div className="space-y-4">
+      <header className="flex flex-wrap items-center gap-3">
+        <a href="/admin" className="px-3 py-2 rounded bg-white/10 border border-white/20">↩︎ Volver</a>
+        <h1 className="text-2xl font-bold">Materiales</h1>
+        <input type="file" accept="application/json" onChange={onImportFile} />
+        <button className="px-3 py-2 rounded bg-white text-black" onClick={addType}>Agregar tipo</button>
+        <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
+        <a href={exportHref} download="materials.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
+        {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
+        {msg && <span className="text-white/60 text-sm">{msg}</span>}
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {items.map((t, ti)=>(
+          <div key={ti} className="rounded-xl border border-white/15 bg-black/40 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <input className="inp w-full text-lg font-semibold min-w-0" value={t.name} onChange={e=>mut(ti,{name:e.target.value})} disabled={!t._edit} />
+              {!t._edit ? (
+                <button className="btn-ghost" title="Editar" onClick={()=>startEditType(ti)}><Pencil size={18}/></button>
+              ) : (
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEditType(ti)}><RotateCcw size={18}/></button>
+                  <button className="btn-ok" title="Guardar" onClick={()=>saveEditType(ti)}><Upload size={18}/></button>
+                  <button className="btn-danger" title="Eliminar tipo" onClick={()=>delType(ti)}><Trash2 size={18}/></button>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-1 space-y-3">
+              <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/80 font-semibold">Gramajes</span>
+                  {t._edit && <button className="btn-ok" onClick={()=>addGrade(ti)}><Plus size={14}/> Añadir</button>}
+              </div>
+              {(t.grades||[]).map((g, gi)=>(
+                <div key={gi} className="rounded-lg border border-white/10 bg-black/30 p-3">
+                  <div className="flex items-center flex-wrap gap-2 mb-2">
+                    {(g.grams||[]).map(gram => (
+                      <span key={gram} className="inline-flex items-center gap-2 bg-white text-black rounded-full px-3 py-1 text-sm">
+                        {gram} g
+                        {t._edit && <button className="text-red-700" onClick={()=>removeGramChip(ti,gi,gram)}><Trash2 size={14}/></button>}
+                      </span>
+                    ))}
+                    {t._edit && (
+                      addingGram?.typeIdx === ti && addingGram?.gradeIdx === gi ?
+                      <input autoFocus className="inp !py-1 !px-2 w-20" placeholder="g" value={newGramValue} onChange={e=>setNewGramValue(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){addGramChip(ti,gi,Number(newGramValue)); setAddingGram(null);}}} onBlur={()=>setAddingGram(null)} />
+                      : <button className="btn-ok !px-2 !py-1" onClick={()=>setAddingGram({typeIdx:ti, gradeIdx:gi})}><Plus size={14}/></button>
+                    )}
+                    {t._edit && <button className="btn-danger ml-auto" title="Eliminar bloque" onClick={()=>delGrade(ti,gi)}><Trash2 size={16}/></button>}
+                  </div>
+
+                  <div className="space-y-2">
+                    {(g.sizes||[]).map((s,si)=>(
+                      <div key={si} className="grid grid-cols-12 gap-2 items-center rounded border border-black/60 bg-white text-black p-2">
+                        <input className="inp col-span-3" type="number" value={s.length_mm} onChange={e=>mutSize(ti,gi,si,{length_mm:Number(e.target.value)})} disabled={!t._edit} placeholder="Ancho"/>
+                        <input className="inp col-span-3" type="number" value={s.width_mm}  onChange={e=>mutSize(ti,gi,si,{width_mm:Number(e.target.value)})}  disabled={!t._edit} placeholder="Largo"/>
+                        <input className="inp col-span-3" value={s.supplier||""} onChange={e=>mutSize(ti,gi,si,{supplier:e.target.value})} disabled={!t._edit} placeholder="Proveedor"/>
+                        <input className="inp col-span-2" type="number" value={s.usd_per_ton ?? ""} onChange={e=>mutSize(ti,gi,si,{usd_per_ton:toNum(e.target.value)})} disabled={!t._edit} placeholder="USD/Ton"/>
+                        <div className="col-span-1 flex justify-end">
+                           {t._edit && <button className="btn-danger" onClick={()=>delSize(ti,gi,si)}><Trash2 size={16}/></button>}
+                        </div>
+                      </div>
+                    ))}
+                    {t._edit && <button className="btn-ok mt-2" onClick={()=>addSize(ti,gi)}><Plus size={16}/> Añadir tamaño</button>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
