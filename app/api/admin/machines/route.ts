@@ -11,10 +11,7 @@ type Bracket = {
 
 export async function GET() {
   const supa = supabaseServer();
-  const { data, error } = await supa
-    .from("machines")
-    .select("*")
-    .order("created_at", { ascending: true });
+  const { data, error } = await supa.from("machines").select("*").order("created_at", { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ items: data ?? [] });
 }
@@ -36,18 +33,14 @@ export async function PUT(req: NextRequest) {
       mech_tail_mm: m.mech_tail_mm ?? 0,
       mech_sides_mm: m.mech_sides_mm ?? 0,
 
-      // --- costos en pesos (preferidos) y fallback en USD ---
       base_setup_uyu: m.base_setup_uyu ?? null,
       base_wash_uyu:  m.base_wash_uyu  ?? null,
       base_setup_usd: m.base_setup_usd ?? null,
       base_wash_usd:  m.base_wash_usd  ?? null,
 
-      min_impressions: m.min_impressions ?? null,
-      feed_long_edge: !!m.feed_long_edge,
-
       price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : (m.priceBrackets ?? []),
     };
-    if (m.id) row.id = m.id; // solo si existe
+    if (m.id) row.id = m.id;
     return row;
   });
 
@@ -80,8 +73,6 @@ export async function POST(req: NextRequest) {
     base_setup_usd: m.base_setup_usd ?? null,
     base_wash_usd:  m.base_wash_usd  ?? null,
 
-    min_impressions: m.min_impressions ?? null,
-    feed_long_edge: !!m.feed_long_edge,
     price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : (m.priceBrackets ?? []),
   };
   const { data, error } = await supa.from("machines").insert(row).select("*").single();
