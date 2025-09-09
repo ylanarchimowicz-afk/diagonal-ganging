@@ -85,6 +85,36 @@ export default function MaterialsAdmin(){
       // @ts-ignore
       setDirty?.(true);
       // @ts-ignore
+      setMsg?.(Importados \ tipos (sin guardar));
+    } catch(err:any){
+      alert("No se pudo importar el JSON: " + (err?.message || "error"));
+    }
+    try { e.currentTarget.value = ""; } catch {}
+  }
+
+  // === Importador robusto: acepta tu JSON externo y el interno ===
+  async function handleImport(e:any){
+    const f = e.currentTarget?.files?.[0];
+    if(!f) return;
+    try{
+      const txt = await f.text();
+      const raw = JSON.parse(txt);
+      let items:any[] = [];
+      if (looksLikeExternalMaterials(raw)) {
+        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon, stocked -> preferred
+      } else if (Array.isArray((raw as any)?.items)) {
+        items = (raw as any).items; // formato interno
+      } else if (Array.isArray(raw)) {
+        items = raw;                // ya normalizado
+      } else {
+        throw new Error("Estructura no reconocida");
+      }
+      // Estas variables ya existen en tu componente original
+      // @ts-ignore
+      setItems(items);
+      // @ts-ignore
+      setDirty?.(true);
+      // @ts-ignore
       setMsg?.(\Importados \ tipos (sin guardar)\);
     } catch(err:any){
       alert("No se pudo importar el JSON: " + (err?.message || "error"));
@@ -204,15 +234,7 @@ export default function MaterialsAdmin(){
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Materiales</h1>
-        <input type="file" accept="application/json" onChange={async (e)=>{
-  const f = e.currentTarget.files?.[0];
-  if (!f) return;
-  try{
-    const txt = await f.text();
-    const raw = JSON.parse(txt);
-    let items:any[] = [];
-    if (looksLikeExternalMaterials(raw)) {
-      // Tu JSON: id, name, priceIndex(=USD/Ton), paperWeight, materialSizes[].factorySize.{wid,len}, stocked
+        <input type="file" accept="application/json" onChange={handleImport}, stocked
       items = normalizeExternalMaterials(raw);
     } else if (Array.isArray((raw as any)?.items)) {
       items = (raw as any).items;                 // formato interno contenedor
@@ -312,4 +334,5 @@ export default function MaterialsAdmin(){
 }
 
 /* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
+
 
