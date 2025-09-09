@@ -1,4 +1,4 @@
-﻿/* app/admin/cuts/page.tsx */
+﻿/* app/admin/cuts/page.tsx  toggle pill y layout 1/3 + 1/3 + 1/3 */
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Upload, RotateCcw, Pencil } from "lucide-react";
@@ -70,7 +70,6 @@ export default function CutsAdmin(){
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      {/* 3 por fila en desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {items.map((g,i)=>(
           <div key={i} className="rounded-lg border border-white/15 bg-black/40 p-3">
@@ -98,20 +97,33 @@ export default function CutsAdmin(){
 
             <div className="mt-3 flex items-center justify-between">
               <span className="text-sm text-white/80 font-semibold">Cortes</span>
-              {g._edit && <button className="btn-ok" onClick={()=>addSheet(i)}><Plus size={14}/> Añadir</button>}
+              {g._edit && <button className="btn-ok" onClick={()=>addSheet(i)}>+ Añadir</button>}
             </div>
 
             <div className="mt-2 space-y-2">
               {(g.sheetSizes||[]).map((s,si)=>(
-                <div key={si} className="rounded-md border border-black/50 bg-white text-black px-2 py-1 flex items-center justify-between">
+                <div key={si} className="rounded-md border border-black/50 bg-white text-black px-2 py-1">
                   {!g._edit ? (
-                    <span className="text-sm">{s.length}  {s.width} {s.preferred ? "(Preferido)":""}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">{s.length}  {s.width} {s.preferred ? "(Preferido)":""}</span>
+                    </div>
                   ) : (
-                    <div className="w-full grid grid-cols-5 gap-2 items-center">
-                      <input className="inp" type="number" value={s.length ?? ""} onChange={e=>mutSize(i,si,{length:toNum(e.target.value)})} placeholder="Ancho"/>
-                      <input className="inp" type="number" value={s.width ?? ""} onChange={e=>mutSize(i,si,{width:toNum(e.target.value)})} placeholder="Largo"/>
-                      <button className={`px-2 py-1 rounded text-sm ${s.preferred?'bg-green-600 text-white':'bg-gray-200 text-gray-900'}`} onClick={()=>mutSize(i,si,{preferred:!s.preferred})}>{s.preferred?'ON':'OFF'}</button>
-                      <div className="col-span-2 flex justify-end">
+                    <div className="grid grid-cols-6 gap-2 items-center">
+                      <input className="inp col-span-2" type="number" value={s.length ?? ""} onChange={e=>mutSize(i,si,{length:toNum(e.target.value)})} placeholder="Ancho"/>
+                      <input className="inp col-span-2" type="number" value={s.width ?? ""} onChange={e=>mutSize(i,si,{width:toNum(e.target.value)})} placeholder="Largo"/>
+
+                      {/* Toggle pill 1/3 (col-span-2) */}
+                      <button
+                        className={`col-span-1 toggle ${s.preferred?'on':'off'}`}
+                        onClick={()=>mutSize(i,si,{preferred:!s.preferred})}
+                        type="button"
+                        title="Preferido"
+                      >
+                        <span className="label">{s.preferred ? "PREFERIDO":"OFF"}</span>
+                        <span className="knob"></span>
+                      </button>
+
+                      <div className="col-span-1 flex justify-end">
                         <button className="btn-danger" onClick={()=>delSheet(i,si)}><Trash2 size={14}/></button>
                       </div>
                     </div>
@@ -130,6 +142,15 @@ export default function CutsAdmin(){
         .btn-ghost{padding:.3rem .45rem;border:1px solid rgba(255,255,255,.35);border-radius:.5rem;background:transparent;}
         .btn-danger{padding:.3rem .45rem;border:1px solid #dc2626;background:#fee2e2;color:#991b1b;border-radius:.5rem;}
         .btn-ok{padding:.3rem .45rem;border:1px solid #16a34a;background:#dcfce7;color:#14532d;border-radius:.5rem;}
+
+        /* Toggle pill */
+        .toggle{position:relative; height:32px; border-radius:9999px; border:1px solid #cbd5e1; display:flex; align-items:center; padding:0 10px; transition:all .2s;}
+        .toggle .label{font-size:.8rem; font-weight:600;}
+        .toggle .knob{position:absolute; right:4px; width:24px; height:24px; border-radius:9999px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:all .2s;}
+        .toggle.off{background:#e5e7eb; color:#334155;}
+        .toggle.off .knob{left:4px; right:auto;}
+        .toggle.on{background:#22c55e; color:#fff; border-color:#16a34a;}
+        .toggle.on .knob{right:4px;}
       `}</style>
     </div>
   );
