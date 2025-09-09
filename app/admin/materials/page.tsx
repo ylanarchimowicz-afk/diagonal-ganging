@@ -16,7 +16,7 @@ const toNum = (s:string) => { const n = Number(s); return Number.isFinite(n) ? n
 const clone = <T,>(x:T)=> JSON.parse(JSON.stringify(x)) as T;
 
 /** === Mapea JSON externo (array plano)  UI MatType[]  ===
- *  Entrada (ejemplo): [{ id, name, priceIndex, paperWeight, materialSizes:[{factorySize:{wid,len},stocked}] }, ...]
+ *  Entrada (ejemplo): [{ id, name, priceIndex, paperWeight, materialSizes:[{factorySize:{wid,len}}] }, ...]
  */
 function mapExternalMaterials(json:any): MatType[] {
   if (!Array.isArray(json)) return [];
@@ -71,7 +71,7 @@ export default function MaterialsAdmin(){
       const raw = JSON.parse(txt);
       let items:any[] = [];
       if (looksLikeExternalMaterials(raw)) {
-        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon, stocked -> preferred
+        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon -> preferred
       } else if (Array.isArray((raw as any)?.items)) {
         items = (raw as any).items; // formato interno
       } else if (Array.isArray(raw)) {
@@ -101,7 +101,7 @@ export default function MaterialsAdmin(){
       const raw = JSON.parse(txt);
       let items:any[] = [];
       if (looksLikeExternalMaterials(raw)) {
-        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon, stocked -> preferred
+        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon -> preferred
       } else if (Array.isArray((raw as any)?.items)) {
         items = (raw as any).items; // formato interno
       } else if (Array.isArray(raw)) {
@@ -234,17 +234,7 @@ export default function MaterialsAdmin(){
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Materiales</h1>
-        <input type="file" accept="application/json" onChange={handleImport}, stocked
-      items = normalizeExternalMaterials(raw);
-    } else if (Array.isArray((raw as any)?.items)) {
-      items = (raw as any).items;                 // formato interno contenedor
-    } else if (Array.isArray(raw)) {
-      items = raw;                                // arreglo ya normalizado
-    } else {
-      throw new Error("Estructura no reconocida");
-    }
-    // La UI queda igual; solo cargamos el estado con la forma esperada
-    // (tipo -> gramaje -> tamaños; usdPerTon tomado de priceIndex).
+        <input type="file" accept="application/json" onChange={handleImport} /> gramaje -> tamaños; usdPerTon tomado de priceIndex).
     // @ts-ignore
     setItems(items);
     // @ts-ignore
@@ -334,6 +324,8 @@ export default function MaterialsAdmin(){
 }
 
 /* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
+
+
 
 
 
