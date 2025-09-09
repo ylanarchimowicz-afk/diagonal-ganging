@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
 
 type Bracket = {
-  constraints: { maxLen: number; maxWid: number }; // maxLen = Ancho (entrada), maxWid = Largo
+  constraints: { maxLen: number; maxWid: number };
   sheetCost: { unit: "per_sheet" | "per_thousand"; value: number; currency?: string };
 };
 type Machine = {
@@ -102,6 +102,7 @@ export default function MachinesAdmin() {
               )}
             </div>
 
+            {/* Layout: izquierda info, derecha costos */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Izquierda */}
               <div className="space-y-3">
@@ -111,39 +112,51 @@ export default function MachinesAdmin() {
                   </select>
                 </Labeled>
 
-                <Labeled label="Tamaño máximo de papel">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="grid gap-1">
-                      <span className="text-xs text-white/70">Ancho (entrada a máquina)</span>
-                      <input type="number" className="inp" value={num(m.max_len_mm)} onChange={e=>mut(i,{max_len_mm:toNum(e.target.value)})} disabled={!m._edit}/>
+                {/* Tamaño máximo: 1 fila completa, 4 columnas  cada input = 1/4 */}
+                <div className="sm:col-span-2">
+                  <Labeled label="Tamaño máximo de papel">
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="grid gap-1 col-span-1">
+                        <span className="text-xs text-white/70">Ancho (entrada a máquina)</span>
+                        <input type="number" className="inp" value={num(m.max_len_mm)} onChange={e=>mut(i,{max_len_mm:toNum(e.target.value)})} disabled={!m._edit}/>
+                      </div>
+                      <div className="grid gap-1 col-span-1">
+                        <span className="text-xs text-white/70">Largo</span>
+                        <input type="number" className="inp" value={num(m.max_wid_mm)} onChange={e=>mut(i,{max_wid_mm:toNum(e.target.value)})} disabled={!m._edit}/>
+                      </div>
+                      <div className="col-span-2" />
                     </div>
-                    <div className="grid gap-1">
-                      <span className="text-xs text-white/70">Largo</span>
-                      <input type="number" className="inp" value={num(m.max_wid_mm)} onChange={e=>mut(i,{max_wid_mm:toNum(e.target.value)})} disabled={!m._edit}/>
-                    </div>
-                  </div>
-                </Labeled>
+                  </Labeled>
+                </div>
 
-                <Labeled label="Costos de preparación (UYU)">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="grid gap-1">
-                      <span className="text-xs text-white/70">Postura</span>
-                      <input type="number" className="inp" value={num(m.base_setup_uyu ?? m.base_setup_usd)} onChange={e=>mut(i,{base_setup_uyu:toNum(e.target.value)})} disabled={!m._edit}/>
+                {/* Preparación: 1 fila completa, 4 columnas  cada input = 1/4 */}
+                <div className="sm:col-span-2">
+                  <Labeled label="Costos de preparación (UYU)">
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="grid gap-1 col-span-1">
+                        <span className="text-xs text-white/70">Postura</span>
+                        <input type="number" className="inp" value={num(m.base_setup_uyu ?? m.base_setup_usd)} onChange={e=>mut(i,{base_setup_uyu:toNum(e.target.value)})} disabled={!m._edit}/>
+                      </div>
+                      <div className="grid gap-1 col-span-1">
+                        <span className="text-xs text-white/70">Lavado</span>
+                        <input type="number" className="inp" value={num(m.base_wash_uyu ?? m.base_wash_usd)} onChange={e=>mut(i,{base_wash_uyu:toNum(e.target.value)})} disabled={!m._edit}/>
+                      </div>
+                      <div className="col-span-2" />
                     </div>
-                    <div className="grid gap-1">
-                      <span className="text-xs text-white/70">Lavado</span>
-                      <input type="number" className="inp" value={num(m.base_wash_uyu ?? m.base_wash_usd)} onChange={e=>mut(i,{base_wash_uyu:toNum(e.target.value)})} disabled={!m._edit}/>
-                    </div>
-                  </div>
-                </Labeled>
+                  </Labeled>
+                </div>
 
-                <Labeled label="Márgenes (mm)">
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="grid gap-1"><span className="text-xs text-white/70">Pinza</span><input type="number" className="inp" value={num(m.mech_clamp_mm)} onChange={e=>mut(i,{mech_clamp_mm:toNum(e.target.value)})} disabled={!m._edit}/></div>
-                    <div className="grid gap-1"><span className="text-xs text-white/70">Cola</span><input type="number" className="inp" value={num(m.mech_tail_mm)} onChange={e=>mut(i,{mech_tail_mm:toNum(e.target.value)})} disabled={!m._edit}/></div>
-                    <div className="grid gap-1"><span className="text-xs text-white/70">Márgenes</span><input type="number" className="inp" value={num(m.mech_sides_mm)} onChange={e=>mut(i,{mech_sides_mm:toNum(e.target.value)})} disabled={!m._edit}/></div>
-                  </div>
-                </Labeled>
+                {/* Márgenes: 1 fila completa, 6 columnas  cada input = 1/6 */}
+                <div className="sm:col-span-2">
+                  <Labeled label="Márgenes (mm)">
+                    <div className="grid grid-cols-6 gap-2">
+                      <div className="grid gap-1 col-span-1"><span className="text-xs text-white/70">Pinza</span><input type="number" className="inp" value={num(m.mech_clamp_mm)} onChange={e=>mut(i,{mech_clamp_mm:toNum(e.target.value)})} disabled={!m._edit}/></div>
+                      <div className="grid gap-1 col-span-1"><span className="text-xs text-white/70">Cola</span><input type="number" className="inp" value={num(m.mech_tail_mm)} onChange={e=>mut(i,{mech_tail_mm:toNum(e.target.value)})} disabled={!m._edit}/></div>
+                      <div className="grid gap-1 col-span-1"><span className="text-xs text-white/70">Márgenes</span><input type="number" className="inp" value={num(m.mech_sides_mm)} onChange={e=>mut(i,{mech_sides_mm:toNum(e.target.value)})} disabled={!m._edit}/></div>
+                      <div className="col-span-3" />
+                    </div>
+                  </Labeled>
+                </div>
               </div>
 
               {/* Derecha  Costos por formato */}
@@ -164,15 +177,11 @@ export default function MachinesAdmin() {
                   {(m.price_brackets??[]).map((b,bi)=>(
                     <div key={bi} className="rounded-lg border border-black/60 bg-white text-black p-2">
                       {!m._edit ? (
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>Ancho (entrada): <b>{b.constraints?.maxLen ?? "-"}</b> mm</div>
-                          <div>Largo: <b>{b.constraints?.maxWid ?? "-"}</b> mm</div>
-                          <div>Unidad: <b>{b.sheetCost?.unit==="per_sheet"?"por hoja":"por millar"}</b></div>
-                          <div>Precio: <b>{b.sheetCost?.value ?? "-"}</b></div>
+                        <div className="text-sm">
+                          {`${b.constraints?.maxLen ?? "-"}${b.constraints?.maxWid ?? "-"} mm  $${b.sheetCost?.value ?? "-"} ${b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}`}
                         </div>
                       ) : (
                         <>
-                          {/* 2 filas x 2 columnas */}
                           <div className="grid grid-cols-2 gap-2">
                             <div className="grid gap-1"><span className="text-xs">Ancho (entrada)</span><input className="inp w-full" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>updBracket(i,bi,{constraints:{...b.constraints,maxLen:toNum(e.target.value) as any}})}/></div>
                             <div className="grid gap-1"><span className="text-xs">Largo</span><input className="inp w-full" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>updBracket(i,bi,{constraints:{...b.constraints,maxWid:toNum(e.target.value) as any}})}/></div>
@@ -187,8 +196,6 @@ export default function MachinesAdmin() {
                 </div>
               </div>
             </div>
-          </div>
-        ))}
       </div>
 
       <style jsx>{`
