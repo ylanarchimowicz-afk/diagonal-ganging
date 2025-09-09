@@ -1,5 +1,4 @@
-﻿// app/admin/machines/page.tsx
-"use client";
+﻿"use client";
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2 } from "lucide-react";
 
@@ -19,7 +18,7 @@ type Machine = {
   mech_clamp_mm?: number|null; mech_tail_mm?: number|null; mech_sides_mm?: number|null;
   base_setup_uyu?: number|null; base_wash_uyu?: number|null;
   base_setup_usd?: number|null; base_wash_usd?: number|null;
-  // Estos dos quedan en UI pero no se persisten aún:
+  // estos dos están en UI; si la DB aún no los tiene, no se persisten (API ya lo maneja)
   min_impressions?: number|null;
   feed_long_edge?: boolean;
   price_brackets?: Bracket[];
@@ -86,7 +85,7 @@ export default function MachinesAdmin() {
   }
   async function saveAll(){
     setMsg("Guardando...");
-    // quitamos campos no persistentes para evitar errores
+    // quitamos campos no persistentes para evitar errores si no existen en la DB
     const payload = items.map(({_edit,_snapshot, min_impressions, feed_long_edge, ...rest})=> rest);
     const r = await fetch("/api/admin/machines", { method:"PUT", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ items: payload }) });
     const j = await r.json();
@@ -123,8 +122,9 @@ export default function MachinesAdmin() {
             <tr>
               <Th>Nombre</Th>
               <Th>Tipo</Th>
-              <Th className="whitespace-nowrap">Máx. papel (Entrada L × W mm)</Th>
+              <Th className="whitespace-nowrap">Máx. papel (Entrada L  W mm)</Th>
               <Th>Setups (Arreglo / Lavado) UYU</Th>
+              <Th className="whitespace-nowrap">Márgenes (Pinza / Cola / Costados mm)</Th>
               <Th>Costos por formato</Th>
               <Th>&nbsp;</Th>
             </tr>
@@ -142,7 +142,7 @@ export default function MachinesAdmin() {
                 <Td>
                   <div className="flex items-center gap-2">
                     <input type="number" placeholder="Entrada L" className="inp w-28" value={num(m.max_len_mm)} onChange={e=>mut(idx,{max_len_mm: toNum(e.target.value)})} disabled={!m._edit}/>
-                    <span>×</span>
+                    <span></span>
                     <input type="number" placeholder="W" className="inp w-24" value={num(m.max_wid_mm)} onChange={e=>mut(idx,{max_wid_mm: toNum(e.target.value)})} disabled={!m._edit}/>
                   </div>
                 </Td>
@@ -151,6 +151,19 @@ export default function MachinesAdmin() {
                     <input type="number" className="inp" placeholder="Arreglo $UYU" value={num(m.base_setup_uyu ?? m.base_setup_usd)} onChange={e=>mut(idx,{base_setup_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
                     <input type="number" className="inp" placeholder="Lavado $UYU" value={num(m.base_wash_uyu ?? m.base_wash_usd)} onChange={e=>mut(idx,{base_wash_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
                   </div>
+                </Td>
+                <Td>
+                  {!m._edit ? (
+                    <div className="chip">
+                      P {m.mech_clamp_mm ?? "-"}  C {m.mech_tail_mm ?? "-"}  L/R {m.mech_sides_mm ?? "-"}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <input type="number" className="inp w-20" placeholder="Pinza" value={num(m.mech_clamp_mm)} onChange={e=>mut(idx,{mech_clamp_mm: toNum(e.target.value)})}/>
+                      <input type="number" className="inp w-20" placeholder="Cola"  value={num(m.mech_tail_mm)}  onChange={e=>mut(idx,{mech_tail_mm:  toNum(e.target.value)})}/>
+                      <input type="number" className="inp w-24" placeholder="Costados" value={num(m.mech_sides_mm)} onChange={e=>mut(idx,{mech_sides_mm: toNum(e.target.value)})}/>
+                    </div>
+                  )}
                 </Td>
                 <Td>
                   <BracketEditor editable={!!m._edit} value={m.price_brackets ?? []} onChange={v=>mut(idx,{price_brackets:v})}/>
@@ -170,31 +183,18 @@ export default function MachinesAdmin() {
                 </Td>
               </tr>
             ))}
-
-            {/* fila de márgenes/opciones, visible solo en edición */}
-            {items.map((m, i)=> m._edit ? (
-              <tr key={"detail-"+(m.id ?? i)} className="border-t border-white/10">
-                <Td colSpan={6}>
-                  <div className="grid md:grid-cols-6 gap-3">
-                    <Labeled label="Pinza (mm)"><input type="number" className="inp w-full" value={num(m.mech_clamp_mm)} onChange={e=>mut(i,{mech_clamp_mm: toNum(e.target.value)})}/></Labeled>
-                    <Labeled label="Cola (mm)"><input type="number" className="inp w-full" value={num(m.mech_tail_mm)} onChange={e=>mut(i,{mech_tail_mm: toNum(e.target.value)})}/></Labeled>
-                    <Labeled label="Costados (mm)"><input type="number" className="inp w-full" value={num(m.mech_sides_mm)} onChange={e=>mut(i,{mech_sides_mm: toNum(e.target.value)})}/></Labeled>
-                    <Labeled label="Mín. impresiones (no guarda aún)"><input type="number" className="inp w-full" value={num(m.min_impressions)} onChange={e=>mut(i,{min_impressions: toNum(e.target.value)})}/></Labeled>
-                    <Labeled label="Entrada por lado largo (no guarda aún)"><input type="checkbox" checked={!!m.feed_long_edge} onChange={e=>mut(i,{feed_long_edge: e.target.checked})}/></Labeled>
-                  </div>
-                </Td>
-              </tr>
-            ) : null)}
           </tbody>
         </table>
       </div>
 
       <style jsx>{`
-        .inp { background:#0f1115; border:1px solid rgba(255,255,255,.12); padding:.45rem .6rem; border-radius:.5rem; }
-        .inp:disabled { opacity:.6; cursor:not-allowed; }
-        .btn-ghost { padding:.35rem .5rem; border:1px solid rgba(255,255,255,.2); border-radius:.5rem; }
-        .btn-danger { padding:.35rem .5rem; border:1px solid rgba(220,38,38,.5); background:rgba(220,38,38,.15); border-radius:.5rem; }
-        .btn-ok { padding:.35rem .5rem; border:1px solid rgba(34,197,94,.5); background:rgba(34,197,94,.15); border-radius:.5rem; }
+        /* Alto contraste */
+        .inp { background:#fff; color:#000; border:1px solid #111; padding:.45rem .6rem; border-radius:.5rem; }
+        .inp:disabled { opacity:.7; cursor:not-allowed; }
+        .btn-ghost { padding:.35rem .5rem; border:1px solid rgba(255,255,255,.3); border-radius:.5rem; background:transparent; }
+        .btn-danger { padding:.35rem .5rem; border:1px solid #dc2626; background:#fee2e2; color:#991b1b; border-radius:.5rem; }
+        .btn-ok { padding:.35rem .5rem; border:1px solid #16a34a; background:#dcfce7; color:#14532d; border-radius:.5rem; }
+        .chip { background:#fff; color:#000; border:1px solid #111; border-radius:.5rem; padding:.2rem .5rem; display:inline-block; }
       `}</style>
     </div>
   );
@@ -205,70 +205,51 @@ function Td({children, className, colSpan}:{children?:any; className?:string; co
 function num(v:any){ return (v ?? "") as any; }
 function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
 
-function Labeled({label, children}:{label:string; children:any}) {
-  return <label className="text-sm grid gap-1">{label}{children}</label>;
-}
-
+/** Tramos / formatos */
 function BracketEditor({ editable, value, onChange }:{ editable:boolean; value: Bracket[]; onChange:(v:Bracket[])=>void }) {
   const list = value ?? [];
-  function add(){ onChange([{ name:"nuevo", constraints:{maxLen:0,maxWid:0}, sheetCost:{unit:"per_sheet", value:0, currency:"UYU"}, notes:"", _edit:true }, ...list]); }
+  function add(){ onChange([{ name:"nuevo", constraints:{maxLen:0,maxWid:0}, sheetCost:{unit:"per_sheet", value:0, currency:"UYU"}, notes:"" }, ...list]); }
   function mut(i:number, patch:Partial<Bracket>){ onChange(list.map((x,ix)=> ix===i ? ({...x, ...patch}) : x)); }
   function rm(i:number){ onChange(list.filter((_,ix)=> ix!==i)); }
-  function start(i:number){ mut(i,{ _edit:true }); }
-  function cancel(i:number){ mut(i,{ _edit:false }); }
-  function save(i:number){ mut(i,{ _edit:false }); }
+
+  if (!editable) {
+    return (
+      <div className="space-y-1">
+        {list.length===0 && <div className="text-white/60 text-xs">Sin tramos</div>}
+        {list.map((b, i)=> (
+          <div key={i} className="bg-white text-black border border-black/60 rounded-md px-2 py-1 flex flex-wrap items-center gap-2">
+            <span className="font-medium">{b.name}</span>
+            <span>{b.constraints?.maxLen ?? "-"}{b.constraints?.maxWid ?? "-"} mm</span>
+            <span> {b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}</span>
+            <span> {b.sheetCost?.value ?? "-"}</span>
+            {b.notes ? <span> {b.notes}</span> : null}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
-      <button className="px-2 py-1 rounded bg-white/10 border border-white/20" onClick={add} disabled={!editable}>+ Tramo</button>
-      {list.length===0 ? <div className="text-white/50 text-xs">Sin tramos</div> : null}
-
-      {/* Lectura compacta por tramo */}
-      {!editable && list.length>0 && (
-        <div className="space-y-1">
-          {list.map((b,i)=> (
-            <div key={"r-"+i} className="rounded-md bg-white/5 px-2 py-1 flex flex-wrap gap-2 items-center">
-              <span className="font-medium">{b.name}</span>
-              <span className="text-white/60">{b.constraints?.maxLen ?? "-"}×{b.constraints?.maxWid ?? "-"} mm</span>
-              <span className="text-white/60">· {b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}</span>
-              <span className="text-white">· {b.sheetCost?.value ?? "-"}</span>
-              {b.notes ? <span className="text-white/50">· {b.notes}</span> : null}
+      <button className="px-2 py-1 rounded bg-white text-black border border-black/60" onClick={add}>+ Tramo</button>
+      {list.map((b, i)=> (
+        <div key={i} className="rounded-lg border border-black/60 bg-white text-black p-2">
+          <div className="grid grid-cols-6 gap-2 items-center">
+            <input className="inp" value={b.name} onChange={e=>mut(i,{name:e.target.value})} placeholder="Nombre del formato"/>
+            <input className="inp w-24" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>mut(i,{constraints:{...b.constraints, maxLen: toNum(e.target.value) as any}})} placeholder="Entrada L"/>
+            <input className="inp w-24" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>mut(i,{constraints:{...b.constraints, maxWid: toNum(e.target.value) as any}})} placeholder="W"/>
+            <select className="inp w-36" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e=>mut(i,{sheetCost:{...(b.sheetCost||{value:0}), unit: e.target.value as any}})}>
+              <option value="per_sheet">Precio por hoja</option>
+              <option value="per_thousand">Precio por millar</option>
+            </select>
+            <input className="inp w-24" type="number" value={b.sheetCost?.value ?? ""} onChange={e=>mut(i,{sheetCost:{...(b.sheetCost||{unit:"per_sheet"}), value: toNum(e.target.value) as any}})} placeholder="Valor"/>
+            <div className="flex gap-2 justify-end">
+              <button className="btn-danger" title="Eliminar" onClick={()=>rm(i)}><Trash2 size={16}/></button>
             </div>
-          ))}
+          </div>
+          <input className="inp w-full mt-2" value={b.notes ?? ""} onChange={e=>mut(i,{notes:e.target.value})} placeholder="Notas (opcional)"/>
         </div>
-      )}
-
-      {/* Editor por tramo */}
-      {editable && (
-        <div className="space-y-2">
-          {list.map((b, i)=> (
-            <div key={"e-"+i} className="rounded-lg border border-white/10 p-2">
-              <div className="grid grid-cols-6 gap-2 items-center">
-                <input className="inp" value={b.name} onChange={e=>mut(i,{name:e.target.value})} placeholder="Nombre del formato"/>
-                <input className="inp w-24" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>mut(i,{constraints:{...b.constraints, maxLen: toNum(e.target.value) as any}})} placeholder="Entrada L"/>
-                <input className="inp w-24" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>mut(i,{constraints:{...b.constraints, maxWid: toNum(e.target.value) as any}})} placeholder="W"/>
-                <select className="inp w-36" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e=>mut(i,{sheetCost:{...(b.sheetCost||{value:0}), unit: e.target.value as any}})}>
-                  <option value="per_sheet">Precio por hoja</option>
-                  <option value="per_thousand">Precio por millar</option>
-                </select>
-                <input className="inp w-24" type="number" value={b.sheetCost?.value ?? ""} onChange={e=>mut(i,{sheetCost:{...(b.sheetCost||{unit:"per_sheet"}), value: toNum(e.target.value) as any}})} placeholder="Valor"/>
-                <div className="flex gap-2 justify-end">
-                  {!b._edit ? (
-                    <button className="btn-ghost" title="Editar tramo" onClick={()=>start(i)} disabled={!editable}><Pencil size={16}/></button>
-                  ) : (
-                    <>
-                      <button className="btn-ghost" title="Cancelar" onClick={()=>cancel(i)}><RotateCcw size={16}/></button>
-                      <button className="btn-ok" title="Guardar" onClick={()=>save(i)}><Upload size={16}/></button>
-                      <button className="btn-danger" title="Eliminar" onClick={()=>rm(i)}><Trash2 size={16}/></button>
-                    </>
-                  )}
-                </div>
-              </div>
-              <input className="inp w-full mt-2" value={b.notes ?? ""} onChange={e=>mut(i,{notes:e.target.value})} placeholder="Notas (opcional)"/>
-            </div>
-          ))}
-        </div>
-      )}
+      ))}
     </div>
   );
 }
