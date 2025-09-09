@@ -116,8 +116,8 @@ export default function MachinesAdmin() {
   function mut(i:number, patch: Partial<Machine>) { setItems(prev => prev.map((x,ix)=> ix===i ? {...x, ...patch} : x)); setDirty(true); }
 }
 
-function Th({children}:{children:any}){ return <th className="text-left font-semibold p-3">{children}</th>; }
-function Td({children}:{children:any}){ return <td className="p-3">{children}</td>; }
+function Th({children}:{children?:any}){ return <th className="text-left font-semibold p-3">{children}</th>; }
+function Td({children}:{children?:any}){ return <td className="p-3">{children}</td>; }
 function num(v:any){ return (v ?? "") as any; }
 function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
 
