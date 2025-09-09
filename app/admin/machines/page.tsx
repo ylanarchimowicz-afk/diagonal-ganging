@@ -221,8 +221,8 @@ export default function MachinesAdmin() {
   );
 }
 
-function Th({children}:{children?:any}){ return <th className="text-left font-semibold p-3">{children ?? <>&nbsp;</>}</th>; }
-function Td({children}:{children?:any}){ return <td className="p-3 align-top">{children}</td>; }
+function Th({ children, className }:{ children?: any; className?: string }) { return <th className={`text-left font-semibold p-3 ${className||""}`}>{children ?? <>&nbsp;</>}</th>; }
+function Td({ children, className }:{ children?: any; className?: string }) { return <td className={`p-3 align-top ${className||""}`}>{children}</td>; }
 function num(v:any){ return (v ?? "") as any; }
 function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
 
