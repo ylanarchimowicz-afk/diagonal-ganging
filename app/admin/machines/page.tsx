@@ -1,4 +1,5 @@
-﻿/* app/admin/machines/page.tsx  layout con proporciones definitivas */
+﻿/* app/admin/machines/page.tsx  fija desbordes en Costos por formato
+   -> inputs 100% de ancho + min-w-0 en wrappers (2x2: 1/2 del panel cada uno) */
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
@@ -44,15 +45,15 @@ export default function MachinesAdmin() {
   }, []);
 
   const toNum = (s: string) => { const n = Number(s); return Number.isFinite(n) ? n : null; };
-  function mut(i: number, patch: Partial<Machine>) { setItems(p => p.map((x, ix) => ix === i ? ({ ...x, ...patch }) : x)); setDirty(true); }
+  function mut(i: number, patch: Partial<Machine>) { setItems(p => p.map((x,ix) => ix===i ? ({...x,...patch}) : x)); setDirty(true); }
   function updBracket(mi: number, bi: number, patch: Partial<Bracket>) {
     const curr = items[mi].price_brackets ?? [];
-    const next = curr.map((x, idx) => idx === bi ? ({ ...x, ...patch }) : x);
+    const next = curr.map((x, idx) => idx===bi ? ({...x,...patch}) : x);
     mut(mi, { price_brackets: next });
   }
   function removeBracket(mi: number, bi: number) {
     const curr = items[mi].price_brackets ?? [];
-    mut(mi, { price_brackets: curr.filter((_, idx) => idx !== bi) });
+    mut(mi, { price_brackets: curr.filter((_, idx) => idx!==bi) });
   }
 
   function addMachine() {
@@ -70,7 +71,7 @@ export default function MachinesAdmin() {
   function startEdit(i: number) { mut(i, { _edit: true, _snapshot: structuredClone(items[i]) }); }
   function cancelEdit(i: number) {
     const snap = items[i]._snapshot;
-    setItems(p => p.map((x, ix) => ix === i ? (snap ? { ...snap, _edit: false, _snapshot: undefined } : { ...x, _edit: false }) : x));
+    setItems(p => p.map((x, ix) => ix===i ? (snap ? { ...snap, _edit: false, _snapshot: undefined } : { ...x, _edit: false }) : x));
   }
   function saveEdit(i: number) { mut(i, { _edit: false, _snapshot: undefined }); }
   async function deleteMachine(id?: string, idx?: number) {
@@ -85,7 +86,7 @@ export default function MachinesAdmin() {
     try {
       const payload = items.map(({ _edit, _snapshot, ...r }) => r);
       const r = await fetch("/api/admin/machines", {
-        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: payload })
+        method: "PUT", headers: { "Content-Type":"application/json" }, body: JSON.stringify({ items: payload })
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j?.error || "falló el guardado");
@@ -95,7 +96,7 @@ export default function MachinesAdmin() {
   }
 
   const exportHref = useMemo(() =>
-    URL.createObjectURL(new Blob([JSON.stringify({ machines: items.map(({ _edit, _snapshot, ...r }) => r) }, null, 2)], { type: "application/json" })),
+    URL.createObjectURL(new Blob([JSON.stringify({ machines: items.map(({ _edit, _snapshot, ...r }) => r) }, null, 2)], { type:"application/json" })),
     [items]
   );
 
@@ -103,16 +104,16 @@ export default function MachinesAdmin() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Máquinas</h1>
-        <input type="file" accept="application/json" onChange={async e => {
-          const f = e.target.files?.[0]; if (!f) return;
-          try {
+        <input type="file" accept="application/json" onChange={async e=>{
+          const f=e.currentTarget.files?.[0]; if(!f) return;
+          try{
             const raw = JSON.parse(await f.text());
-            const arr: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines) ? raw.machines : (Array.isArray(raw?.items) ? raw.items : []));
-            const list: Machine[] = arr.map((m: any) => ({ ...m, price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : [], _edit: false }));
+            const arr:any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines)?raw.machines:(Array.isArray(raw?.items)?raw.items:[]));
+            const list:Machine[] = arr.map((m:any)=>({...m, price_brackets:Array.isArray(m.price_brackets)?m.price_brackets:[], _edit:false}));
             setItems(list); setDirty(true);
-          } catch { alert("JSON inválido"); }
-          e.currentTarget.value = "";
-        }} />
+          }catch{ alert("JSON inválido"); }
+          e.currentTarget.value="";
+        }}/>
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addMachine}>Agregar</button>
         <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
         <a href={exportHref} download="machines.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
@@ -147,7 +148,7 @@ export default function MachinesAdmin() {
 
             {/* Cuerpo: izquierda datos / derecha tramos */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Izquierda (50% del card) */}
+              {/* Izquierda */}
               <div className="space-y-4">
                 <label className="grid gap-1 text-sm">
                   <span className="text-white/80">Tipo</span>
@@ -162,62 +163,59 @@ export default function MachinesAdmin() {
                   </select>
                 </label>
 
-                {/* Tamaño máximo: dentro de la columna izquierda (12 cols)  cada input col-span-6 */}
                 <div>
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Tamaño máximo de papel</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a máquina)</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                       <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Largo</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={m.max_wid_mm ?? ""} onChange={e => mut(i, { max_wid_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                     </div>
                   </label>
                 </div>
 
-                {/* Preparación: cada input col-span-6 (mitad de la columna izquierda) */}
                 <div>
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Costos de preparación (UYU)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Postura</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={(m.base_setup_uyu ?? m.base_setup_usd) ?? ""} onChange={e => mut(i, { base_setup_uyu: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                       <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Lavado</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={(m.base_wash_uyu ?? m.base_wash_usd) ?? ""} onChange={e => mut(i, { base_wash_uyu: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                     </div>
                   </label>
                 </div>
 
-                {/* Márgenes: tres inputs  col-span-4 cada uno (un tercio de la columna izquierda) */}
                 <div>
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Márgenes (mm)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Pinza</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={m.mech_clamp_mm ?? ""} onChange={e => mut(i, { mech_clamp_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                       <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Cola</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                       <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Márgenes</span>
-                        <input type="number" className="inp w-full"
+                        <input type="number" className="inp w-full min-w-0"
                           value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                     </div>
@@ -247,37 +245,39 @@ export default function MachinesAdmin() {
                   {(m.price_brackets ?? []).map((b, bi) => (
                     <div key={bi} className="rounded-lg border border-black/60 bg-white text-black p-2">
                       {!m._edit ? (
-                        <div className="text-sm">
+                        <div className="text-sm truncate">
                           {(b.constraints?.maxLen ?? "-")}{(b.constraints?.maxWid ?? "-")} mm  ${b.sheetCost?.value ?? "-"} {b.sheetCost?.unit === "per_sheet" ? "por hoja" : "por millar"}
                         </div>
                       ) : (
                         <>
+                          {/* 2x2: cada control = 1/2 del panel derecho ( 1/4 del card) */}
                           <div className="grid grid-cols-2 gap-2">
-                            <label className="grid gap-1 text-xs">
+                            <label className="grid gap-1 text-xs min-w-0">
                               <span>Ancho (entrada)</span>
-                              <input className="inp"
+                              <input className="inp w-full min-w-0"
                                      type="number" value={b.constraints?.maxLen ?? ""}
                                      onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxWid: 0 }), maxLen: Number(e.target.value || 0) } })} />
                             </label>
-                            <label className="grid gap-1 text-xs">
+                            <label className="grid gap-1 text-xs min-w-0">
                               <span>Largo</span>
-                              <input className="inp"
+                              <input className="inp w-full min-w-0"
                                      type="number" value={b.constraints?.maxWid ?? ""}
                                      onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxLen: 0 }), maxWid: Number(e.target.value || 0) } })} />
                             </label>
-                            <label className="grid gap-1 text-xs">
+                            <label className="grid gap-1 text-xs min-w-0">
                               <span>Unidad</span>
-                              <select className="inp"
+                              <select className="inp w-full min-w-0"
                                       value={b.sheetCost?.unit ?? "per_sheet"}
                                       onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { value: 0 }), unit: e.target.value as any } })}>
                                 <option value="per_sheet">por hoja</option>
                                 <option value="per_thousand">por millar</option>
                               </select>
                             </label>
-                            <label className="grid gap-1 text-xs">
+                            <label className="grid gap-1 text-xs min-w-0">
                               <span>Precio</span>
-                              <input className="inp"
-                                     type="number" value={b.sheetCost?.value ?? ""}
+                              <input className="inp w-full min-w-0"
+                                     type="number" inputMode="decimal" step="0.1"
+                                     value={b.sheetCost?.value ?? ""}
                                      onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { unit: "per_sheet" }), value: Number(e.target.value || 0) } })} />
                             </label>
                           </div>
