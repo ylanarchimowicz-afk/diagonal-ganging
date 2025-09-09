@@ -62,6 +62,37 @@ function mapExternalMaterials(json:any): MatType[] {
 }
 
 export default function MaterialsAdmin(){
+  // === Importador robusto: acepta tu JSON externo y el interno ===
+  async function handleImport(e:any){
+    const f = e.currentTarget?.files?.[0];
+    if(!f) return;
+    try{
+      const txt = await f.text();
+      const raw = JSON.parse(txt);
+      let items:any[] = [];
+      if (looksLikeExternalMaterials(raw)) {
+        items = normalizeExternalMaterials(raw); // priceIndex -> usdPerTon, stocked -> preferred
+      } else if (Array.isArray((raw as any)?.items)) {
+        items = (raw as any).items; // formato interno
+      } else if (Array.isArray(raw)) {
+        items = raw;                // ya normalizado
+      } else {
+        throw new Error("Estructura no reconocida");
+      }
+      // Estas variables ya existen en tu componente original
+      // @ts-ignore
+      setItems(items);
+      // @ts-ignore
+      setDirty?.(true);
+      // @ts-ignore
+      setMsg?.(\Importados \ tipos (sin guardar)\);
+    } catch(err:any){
+      alert("No se pudo importar el JSON: " + (err?.message || "error"));
+    }
+    // limpiar el input
+    try { e.currentTarget.value = ""; } catch {}
+  }
+
   const [items, setItems] = useState<MatType[]>([]);
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
@@ -281,3 +312,4 @@ export default function MaterialsAdmin(){
 }
 
 /* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
+
