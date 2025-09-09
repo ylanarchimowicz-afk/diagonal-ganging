@@ -1,4 +1,4 @@
-﻿// app/api/admin/materials/route.ts
+// app/api/admin/materials/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 

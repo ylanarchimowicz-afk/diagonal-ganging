@@ -1,4 +1,4 @@
-﻿// app/api/admin/paper-cuts/route.ts
+// app/api/admin/paper-cuts/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 

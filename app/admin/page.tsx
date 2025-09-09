@@ -1,4 +1,4 @@
-﻿// app/admin/page.tsx
+// app/admin/page.tsx
 import Link from "next/link";
 function Card({href,title,desc}:{href:string;title:string;desc:string}) {
   return <Link href={href} className="rounded-2xl bg-[#111317] p-5 border border-white/10 hover:border-white/20 block">

@@ -1,4 +1,4 @@
-﻿/* app/admin/machines/page.tsx  fija desbordes en Costos por formato
+/* app/admin/machines/page.tsx  fija desbordes en Costos por formato
    -> inputs 100% de ancho + min-w-0 en wrappers (2x2: 1/2 del panel cada uno) */
 "use client";
 import { useEffect, useMemo, useState } from "react";
@@ -17,7 +17,7 @@ type Machine = {
   max_wid_mm?: number | null;  // largo
   mech_clamp_mm?: number | null; // pinza
   mech_tail_mm?: number | null;  // cola
-  mech_sides_mm?: number | null; // márgenes
+  mech_sides_mm?: number | null; // mÃ¡rgenes
   base_setup_uyu?: number | null; // postura
   base_wash_uyu?: number | null;  // lavado
   base_setup_usd?: number | null;
@@ -58,7 +58,7 @@ export default function MachinesAdmin() {
 
   function addMachine() {
     setItems(p => [{
-      name: "Nueva máquina",
+      name: "Nueva mÃ¡quina",
       is_offset: false,
       max_len_mm: null, max_wid_mm: null,
       mech_clamp_mm: 0, mech_tail_mm: 0, mech_sides_mm: 0,
@@ -75,7 +75,7 @@ export default function MachinesAdmin() {
   }
   function saveEdit(i: number) { mut(i, { _edit: false, _snapshot: undefined }); }
   async function deleteMachine(id?: string, idx?: number) {
-    if (!confirm("¿Eliminar máquina?")) return;
+    if (!confirm("Â¿Eliminar mÃ¡quina?")) return;
     try { if (id) await fetch(`/api/admin/machines?id=${id}`, { method: "DELETE" }); } catch {}
     setItems(p => p.filter((_, i) => i !== (idx ?? -1)));
     setDirty(true);
@@ -89,7 +89,7 @@ export default function MachinesAdmin() {
         method: "PUT", headers: { "Content-Type":"application/json" }, body: JSON.stringify({ items: payload })
       });
       const j = await r.json();
-      if (!r.ok) throw new Error(j?.error || "falló el guardado");
+      if (!r.ok) throw new Error(j?.error || "fallÃ³ el guardado");
       setItems((j.items ?? payload).map((m: Machine) => ({ ...m, _edit: false, _snapshot: undefined })));
       setDirty(false); setMsg(`Guardado OK (${(j.items ?? payload).length})`);
     } catch (e: any) { setMsg("No se pudo guardar: " + (e?.message || "error")); }
@@ -104,7 +104,7 @@ export default function MachinesAdmin() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <a href="/admin" className="btn btn-ghost gap-2">Volver</a>
-        <h1 className="text-2xl font-bold">Máquinas</h1>
+        <h1 className="text-2xl font-bold">MÃ¡quinas</h1>
         <input type="file" accept="application/json" onChange={async e=>{
           const f=e.currentTarget.files?.[0]; if(!f) return;
           try{
@@ -112,7 +112,7 @@ export default function MachinesAdmin() {
             const arr:any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines)?raw.machines:(Array.isArray(raw?.items)?raw.items:[]));
             const list:Machine[] = arr.map((m:any)=>({...m, price_brackets:Array.isArray(m.price_brackets)?m.price_brackets:[], _edit:false}));
             setItems(list); setDirty(true);
-          }catch{ alert("JSON inválido"); }
+          }catch{ alert("JSON invÃ¡lido"); }
           e.currentTarget.value="";
         }}/>
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addMachine}>Agregar</button>
@@ -122,17 +122,17 @@ export default function MachinesAdmin() {
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
-      <p className="text-white/60 text-xs">Nota: la <b>primera medida</b> es la de <b>entrada a máquina</b>.</p>
+      <p className="text-white/60 text-xs">Nota: la <b>primera medida</b> es la de <b>entrada a mÃ¡quina</b>.</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((m, i) => (
           <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4">
-            {/* Título + acciones */}
+            {/* TÃ­tulo + acciones */}
             <div className="flex items-center justify-between gap-2">
               <input
                 className="inp w-full text-lg font-semibold min-w-0"
                 value={m.name} onChange={e => mut(i, { name: e.target.value })}
-                placeholder="Nombre de la máquina" disabled={!m._edit}
+                placeholder="Nombre de la mÃ¡quina" disabled={!m._edit}
               />
               {!m._edit ? (
                 <div className="flex gap-2">
@@ -166,10 +166,10 @@ export default function MachinesAdmin() {
 
                 <div>
                   <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Tamaño máximo de papel</span>
+                    <span className="text-white/80">TamaÃ±o mÃ¡ximo de papel</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-6 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a máquina)</span>
+                        <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a mÃ¡quina)</span>
                         <input type="number" className="inp w-full min-w-0"
                           value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
@@ -184,7 +184,7 @@ export default function MachinesAdmin() {
 
                 <div>
                   <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Costos de preparación (UYU)</span>
+                    <span className="text-white/80">Costos de preparaciÃ³n (UYU)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Postura</span>
@@ -202,7 +202,7 @@ export default function MachinesAdmin() {
 
                 <div>
                   <label className="grid gap-2 text-sm">
-                    <span className="text-white/80">Márgenes (mm)</span>
+                    <span className="text-white/80">MÃ¡rgenes (mm)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Pinza</span>
@@ -215,7 +215,7 @@ export default function MachinesAdmin() {
                           value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
                       <div className="col-span-4 min-w-0">
-                        <span className="text-xs text-white/70 whitespace-nowrap">Márgenes</span>
+                        <span className="text-xs text-white/70 whitespace-nowrap">MÃ¡rgenes</span>
                         <input type="number" className="inp w-full min-w-0"
                           value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>

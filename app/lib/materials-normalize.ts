@@ -1,8 +1,8 @@
-﻿export type MatSize = { w:number; l:number; supplier?:string; usdPerTon:number|null; preferred?:boolean };
+export type MatSize = { w:number; l:number; supplier?:string; usdPerTon:number|null; preferred?:boolean };
 export type MatGram = { gram:number; sizes: MatSize[] };
 export type MatType = { name:string; grams: MatGram[] };
 
-// Agrupa gramos con mismos tamaños+precio en una sola tarjeta (p.ej. 80 y 90 iguales)
+// Agrupa gramos con mismos tamaÃ±os+precio en una sola tarjeta (p.ej. 80 y 90 iguales)
 function keyForGramEntry(sizes: MatSize[], usd:number|null): string {
   const norm = [...sizes]
     .map(s=>`${s.w}x${s.l}-${s.preferred?1:0}`)
@@ -32,7 +32,7 @@ export function normalizeExternalMaterials(input:any): MatType[] {
     map[name].push({ gram, sizes, usd });
   }
 
-  // 2) por cada material, agrupar gramos con mismos tamaños+precio
+  // 2) por cada material, agrupar gramos con mismos tamaÃ±os+precio
   const out: MatType[] = [];
   for (const name of Object.keys(map).sort()) {
     const entries = map[name];
@@ -44,8 +44,8 @@ export function normalizeExternalMaterials(input:any): MatType[] {
     }
     const grams: MatGram[] = [];
     for (const g of Object.values(groups)) {
-      // La UI actual espera "un gramaje", pero mostramos TODOS los gramajes unidos en título (chips/etiqueta la UI ya los dibuja)
-      // Internamente dejamos el menor gramaje como "gram" y los demás seguirán visibles en la etiqueta que ya renderiza la página.
+      // La UI actual espera "un gramaje", pero mostramos TODOS los gramajes unidos en tÃ­tulo (chips/etiqueta la UI ya los dibuja)
+      // Internamente dejamos el menor gramaje como "gram" y los demÃ¡s seguirÃ¡n visibles en la etiqueta que ya renderiza la pÃ¡gina.
       const gram = [...g.grams].sort((a,b)=>a-b)[0];
       grams.push({ gram, sizes: g.sizes.map(s=>({ ...s, usdPerTon: g.usd })) });
     }

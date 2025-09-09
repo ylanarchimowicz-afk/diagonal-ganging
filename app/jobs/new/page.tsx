@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 
 function Tab({children, selected, onClick}:{children:any; selected:boolean; onClick:()=>void}) {
@@ -95,7 +95,7 @@ export default function NewJob() {
           </section>
         ) : (
           <section className="space-y-3">
-            <Row label="Tamaño (mm)">
+            <Row label="TamaÃ±o (mm)">
               <input placeholder="ancho" className="inp"/> <span>x</span> <input placeholder="alto" className="inp"/>
             </Row>
             <Row label="Tintas"><select className="inp"><option>CMYK</option><option>B&N</option><option>Spot</option></select></Row>
@@ -109,7 +109,7 @@ export default function NewJob() {
       <aside className="space-y-4">
         <div className="rounded-2xl bg-[#111317] p-5 border border-white/10">
           <h4 className="font-semibold mb-2">Tip</h4>
-          <p className="text-sm text-white/70">En Auto detectamos tamaño, BN/CMYK/Spot y bleed. Despues confirmas y listo.</p>
+          <p className="text-sm text-white/70">En Auto detectamos tamaÃ±o, BN/CMYK/Spot y bleed. Despues confirmas y listo.</p>
         </div>
       </aside>
 

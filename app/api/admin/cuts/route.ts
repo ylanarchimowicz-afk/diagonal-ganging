@@ -1,4 +1,4 @@
-﻿/* app/api/admin/cuts/route.ts
+/* app/api/admin/cuts/route.ts
    GET  -> devuelve { items }
    PUT  -> guarda { items } en memoria de la lambda y devuelve eco
    OPTIONS -> 200 (para preflight)

@@ -1,10 +1,10 @@
-﻿/* app/layout.tsx  Root layout con estilos globales */
+/* app/layout.tsx  Root layout con estilos globales */
 import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Diagonal  Ganging / Imposición",
-  description: "Calculá costos, asigná máquinas y generá imposición lista para imprimir.",
+  title: "Diagonal  Ganging / ImposiciÃ³n",
+  description: "CalculÃ¡ costos, asignÃ¡ mÃ¡quinas y generÃ¡ imposiciÃ³n lista para imprimir.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

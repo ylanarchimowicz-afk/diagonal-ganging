@@ -1,4 +1,4 @@
-﻿// app/api/admin/machines/route.ts
+// app/api/admin/machines/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
@@ -19,7 +19,7 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   const payload = await req.json().catch(() => ({}));
   const incoming = Array.isArray(payload?.items) ? payload.items : [];
-  if (!incoming.length) return NextResponse.json({ error: "items vacío" }, { status: 400 });
+  if (!incoming.length) return NextResponse.json({ error: "items vacÃ­o" }, { status: 400 });
 
   const rows = incoming.map((m: any) => {
     const row: any = {

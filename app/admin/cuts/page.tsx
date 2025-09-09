@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useMemo, useState } from "react";
 
@@ -67,12 +67,41 @@ export default function CutsPage() {
     setDirty(false);
   }
 
-  return (
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const f = e.currentTarget.files?.[0];
+  if (!f) return;
+  try {
+    const txt = await f.text();
+    const raw = JSON.parse(txt);
+
+    // Acepta: [{paper_w, paper_l, cuts:[{w,l,preferred}]}]  o  {groups:[...]}
+    const groupsIn: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.groups) ? raw.groups : []);
+    if (!groupsIn.length) throw new Error("Estructura no reconocida. Esperaba array o {groups:[...]}.");
+
+    const norm = groupsIn.map((g: any) => ({
+      paper_w: Number(g.paper_w ?? g.w ?? g.width ?? 0),
+      paper_l: Number(g.paper_l ?? g.l ?? g.length ?? 0),
+      cuts: (Array.isArray(g.cuts) ? g.cuts : []).map((c: any) => ({
+        w: Number(c.w ?? 0),
+        l: Number(c.l ?? 0),
+        preferred: !!c.preferred,
+      })),
+    }));
+
+    if (typeof setGroups === "function") setGroups(norm);
+    if (typeof setDirty === "function")  setDirty(true);
+    if (typeof setMsg === "function")    setMsg(`Importados ${norm.length} grupos (sin guardar)`);
+  } catch (err:any) {
+    alert("No se pudo importar el JSON: " + (err?.message || "error"));
+  }
+  e.currentTarget.value = "";
+};
+
     <div className="space-y-4">
       <header className="flex flex-wrap items-center gap-3">
         <a href="/admin" className="btn btn-ghost gap-2">Volver</a>
         <h1 className="text-2xl font-bold">Cortes</h1>
-        <input type="file" accept="application/json" onChange={onImportFile}/>
+        <input type="file" accept="application/json" / onChange={handleImport}>
         <button className="btn" onClick={addGroup}>Agregar grupo</button>
         <button className="btn" onClick={onExport}>Exportar JSON</button>
         {dirty && <span className="text-yellow-400">Cambios sin guardar</span>}
@@ -97,7 +126,7 @@ export default function CutsPage() {
                 onChange={e=>mutGroup(gi,{paper_l:Number(e.target.value)})}
               />
               <div className="ml-auto flex gap-2">
-                <button className="btn btn-success btn-sm" onClick={()=>addSize(gi)}>+ Añadir</button>
+                <button className="btn btn-success btn-sm" onClick={()=>addSize(gi)}>+ AÃ±adir</button>
                 <button className="btn btn-error btn-sm" onClick={()=>rmGroup(gi)}>Eliminar grupo</button>
               </div>
             </div>
@@ -106,7 +135,7 @@ export default function CutsPage() {
             <div className="space-y-2">
               {g.sizes.map((s, si)=>(
                 <div key={si} className="flex items-center gap-3 rounded-md border p-2">
-                  {/* Ancho y Largo: más chicos para dejar lugar al toggle */}
+                  {/* Ancho y Largo: mÃ¡s chicos para dejar lugar al toggle */}
                   <input
                     className="input input-bordered w-24"
                     placeholder="Ancho"
@@ -120,7 +149,7 @@ export default function CutsPage() {
                     onChange={e=>mutSize(gi,si,{l:Number(e.target.value)})}
                   />
 
-                  {/* Toggle preferido: ocupa más espacio y no se corta el texto */}
+                  {/* Toggle preferido: ocupa mÃ¡s espacio y no se corta el texto */}
                   <div className="flex items-center gap-2 grow">
                     <span className="text-sm whitespace-nowrap">Preferido</span>
                     <label className="inline-flex cursor-pointer items-center">
