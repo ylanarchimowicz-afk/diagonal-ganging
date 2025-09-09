@@ -76,7 +76,7 @@ export default function MachinesAdmin() {
         <table className="w-full text-sm">
           <thead className="bg-white/5">
             <tr>
-              <Th>Nombre</Th><Th>Offset</Th><Th>Util (LxW mm)</Th><Th>Setups</Th><Th>Brackets</Th><Th></Th>
+              <Th>Nombre</Th><Th>Offset</Th><Th>Util (LxW mm)</Th><Th>Setups</Th><Th>Brackets</Th><Th>&nbsp;</Th>
             </tr>
           </thead>
           <tbody>
@@ -154,4 +154,5 @@ function BracketEditor({ value, onChange }:{ value: any[]; onChange:(v:any[])=>v
     </div>
   );
 }
+
 

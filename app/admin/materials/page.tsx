@@ -49,7 +49,7 @@ export default function MaterialsAdmin() {
         <table className="w-full text-sm">
           <thead className="bg-white/5">
             <tr>
-              <Th>Nombre</Th><Th>Proveedor</Th><Th>GSM</Th><Th>Origen (LxW)</Th><Th>Costo</Th><Th>Stock</Th><Th></Th>
+              <Th>Nombre</Th><Th>Proveedor</Th><Th>GSM</Th><Th>Origen (LxW)</Th><Th>Costo</Th><Th>Stock</Th><Th>&nbsp;</Th>
             </tr>
           </thead>
           <tbody>
@@ -89,3 +89,4 @@ export default function MaterialsAdmin() {
   function Td({children}:{children?:any}){ return <td className="p-3">{children}</td>; }
   function toNum(s:string){ const n = Number(s); return Number.isFinite(n)? n : null; }
 }
+
