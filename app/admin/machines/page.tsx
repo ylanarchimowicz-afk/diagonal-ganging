@@ -1,6 +1,7 @@
-﻿"use client";
+﻿/* app/admin/machines/page.tsx */
+"use client";
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, RotateCcw, Upload, Trash2 } from "lucide-react";
+import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
 
 type Bracket = {
   name: string;
@@ -18,7 +19,7 @@ type Machine = {
   mech_clamp_mm?: number|null; mech_tail_mm?: number|null; mech_sides_mm?: number|null;
   base_setup_uyu?: number|null; base_wash_uyu?: number|null;
   base_setup_usd?: number|null; base_wash_usd?: number|null;
-  // estos dos están en UI; si la DB aún no los tiene, no se persisten (API ya lo maneja)
+  // estos dos quizás no existen en DB; no se envían al guardar
   min_impressions?: number|null;
   feed_long_edge?: boolean;
   price_brackets?: Bracket[];
@@ -54,8 +55,8 @@ export default function MachinesAdmin() {
 
   function addMachine(){
     setItems(p=> [{
-      name:"Nueva máquina", is_offset:false,
-      max_len_mm:null, max_wid_mm:null,
+      name:"Nueva máquina",
+      is_offset:false, max_len_mm:null, max_wid_mm:null,
       mech_clamp_mm:0, mech_tail_mm:0, mech_sides_mm:0,
       base_setup_uyu:null, base_wash_uyu:null,
       min_impressions:null, feed_long_edge:true,
@@ -67,31 +68,33 @@ export default function MachinesAdmin() {
     setItems(p=> p.map((x,ix)=> ix===i ? ({...x, _edit:true, _snapshot: structuredClone(x)}) : x));
   }
   function cancelEdit(i:number){
-    setItems(p=> p.map((x,ix)=> {
-      if (ix!==i) return x;
-      const snap = x._snapshot ?? x;
-      const { _snapshot, _edit, ...rest } = snap as any;
-      return { ...rest, _edit:false };
-    }));
+    setItems(p=> p.map((x,ix)=> ix===i ? (x._snapshot ? ({...x._snapshot, _edit:false, _snapshot:undefined}) : ({...x, _edit:false})) : x));
   }
   function saveEdit(i:number){
     setItems(p=> p.map((x,ix)=> ix===i ? ({...x, _edit:false, _snapshot:undefined}) : x));
     setDirty(true);
   }
   async function deleteMachine(id?: string, idx?: number){
+    if (!confirm("¿Eliminar máquina?")) return;
     if (id) await fetch(`/api/admin/machines?id=${id}`, { method:"DELETE" });
     if (typeof idx === "number") setItems(p=> p.filter((_,i)=> i!==idx));
     setDirty(true);
   }
+
   async function saveAll(){
     setMsg("Guardando...");
-    // quitamos campos no persistentes para evitar errores si no existen en la DB
+    // no enviar campos que tal vez no existan en DB
     const payload = items.map(({_edit,_snapshot, min_impressions, feed_long_edge, ...rest})=> rest);
     const r = await fetch("/api/admin/machines", { method:"PUT", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ items: payload }) });
     const j = await r.json();
-    if (r.ok) { setItems((j.items ?? []).map((m:Machine)=> ({...m, _edit:false}))); setDirty(false); setMsg(`Guardado OK (${j.items?.length ?? 0})`); }
-    else { setMsg("Error: " + (j.error || "desconocido")); }
+    if (r.ok) {
+      setItems((j.items ?? []).map((m:Machine)=> ({...m, _edit:false, _snapshot:undefined})));
+      setDirty(false); setMsg(`Guardado OK (${j.items?.length ?? 0})`);
+    } else {
+      setMsg("Error: " + (j.error || "desconocido"));
+    }
   }
+
   const exportHref = useMemo(()=> {
     const payload = items.map(({_edit,_snapshot, ...rest})=> rest);
     return URL.createObjectURL(new Blob([JSON.stringify({ machines: payload }, null, 2)], { type:"application/json" }));
@@ -103,7 +106,7 @@ export default function MachinesAdmin() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Máquinas</h1>
         <input type="file" accept="application/json" onChange={onImportFile} />
@@ -116,140 +119,166 @@ export default function MachinesAdmin() {
 
       <p className="text-white/60 text-xs">Nota: la <b>primera medida</b> siempre es la de <b>ENTRADA</b> del papel.</p>
 
-      <div className="overflow-x-auto rounded-xl border border-white/10">
-        <table className="w-full text-sm">
-          <thead className="bg-white/5">
-            <tr>
-              <Th>Nombre</Th>
-              <Th>Tipo</Th>
-              <Th className="whitespace-nowrap">Máx. papel (Entrada L  W mm)</Th>
-              <Th>Setups (Arreglo / Lavado) UYU</Th>
-              <Th className="whitespace-nowrap">Márgenes (Pinza / Cola / Costados mm)</Th>
-              <Th>Costos por formato</Th>
-              <Th>&nbsp;</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((m, idx)=> (
-              <tr key={m.id ?? idx} className="border-t border-white/10 align-top">
-                <Td><input value={m.name} onChange={e=>mut(idx,{name:e.target.value})} className="inp w-48" disabled={!m._edit}/></Td>
-                <Td>
-                  <select value={m.is_offset ? "offset":"digital"} onChange={e=>mut(idx,{is_offset: e.target.value==="offset"})} className="inp w-28" disabled={!m._edit}>
+      {/* grid de tarjetas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {items.map((m, i)=> (
+          <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4">
+            {/* header tarjeta */}
+            <div className="flex items-center justify-between gap-2">
+              <input
+                className="inp text-lg font-semibold w-full"
+                value={m.name} onChange={e=>mut(i,{name:e.target.value})}
+                placeholder="Nombre de la máquina" disabled={!m._edit}
+              />
+              {!m._edit ? (
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Editar" onClick={()=>startEdit(i)}><Pencil size={18}/></button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEdit(i)}><RotateCcw size={18}/></button>
+                  <button className="btn-ok" title="Guardar edición" onClick={()=>saveEdit(i)}><Upload size={18}/></button>
+                  <button className="btn-danger" title="Eliminar" onClick={()=>deleteMachine(m.id, i)}><Trash2 size={18}/></button>
+                </div>
+              )}
+            </div>
+
+            {/* cuerpo tarjeta */}
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Columna izquierda */}
+              <div className="space-y-3">
+                <Labeled label="Tipo">
+                  <select className="inp" value={m.is_offset ? "offset" : "digital"}
+                          onChange={e=>mut(i,{is_offset: e.target.value==="offset"})} disabled={!m._edit}>
                     <option value="digital">Digital</option>
                     <option value="offset">Offset</option>
                   </select>
-                </Td>
-                <Td>
+                </Labeled>
+
+                <Labeled label="Máximo papel (Entrada L × W mm)">
                   <div className="flex items-center gap-2">
-                    <input type="number" placeholder="Entrada L" className="inp w-28" value={num(m.max_len_mm)} onChange={e=>mut(idx,{max_len_mm: toNum(e.target.value)})} disabled={!m._edit}/>
-                    <span></span>
-                    <input type="number" placeholder="W" className="inp w-24" value={num(m.max_wid_mm)} onChange={e=>mut(idx,{max_wid_mm: toNum(e.target.value)})} disabled={!m._edit}/>
+                    <input type="number" className="inp w-28" placeholder="Entrada L"
+                           value={num(m.max_len_mm)} onChange={e=>mut(i,{max_len_mm: toNum(e.target.value)})}
+                           disabled={!m._edit}/>
+                    <span>×</span>
+                    <input type="number" className="inp w-28" placeholder="W"
+                           value={num(m.max_wid_mm)} onChange={e=>mut(i,{max_wid_mm: toNum(e.target.value)})}
+                           disabled={!m._edit}/>
                   </div>
-                </Td>
-                <Td>
+                </Labeled>
+
+                <Labeled label="Setups (UYU)">
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="number" className="inp" placeholder="Arreglo $UYU" value={num(m.base_setup_uyu ?? m.base_setup_usd)} onChange={e=>mut(idx,{base_setup_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
-                    <input type="number" className="inp" placeholder="Lavado $UYU" value={num(m.base_wash_uyu ?? m.base_wash_usd)} onChange={e=>mut(idx,{base_wash_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
+                    <input type="number" className="inp" placeholder="Arreglo"
+                           value={num(m.base_setup_uyu ?? m.base_setup_usd)}
+                           onChange={e=>mut(i,{base_setup_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
+                    <input type="number" className="inp" placeholder="Lavado"
+                           value={num(m.base_wash_uyu ?? m.base_wash_usd)}
+                           onChange={e=>mut(i,{base_wash_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
                   </div>
-                </Td>
-                <Td>
+                </Labeled>
+
+                <Labeled label="Márgenes (mm)">
                   {!m._edit ? (
-                    <div className="chip">
-                      P {m.mech_clamp_mm ?? "-"}  C {m.mech_tail_mm ?? "-"}  L/R {m.mech_sides_mm ?? "-"}
-                    </div>
+                    <div className="chip">Pinza {m.mech_clamp_mm ?? "-"} · Cola {m.mech_tail_mm ?? "-"} · Costados {m.mech_sides_mm ?? "-"}</div>
                   ) : (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <input type="number" className="inp w-20" placeholder="Pinza" value={num(m.mech_clamp_mm)} onChange={e=>mut(idx,{mech_clamp_mm: toNum(e.target.value)})}/>
-                      <input type="number" className="inp w-20" placeholder="Cola"  value={num(m.mech_tail_mm)}  onChange={e=>mut(idx,{mech_tail_mm:  toNum(e.target.value)})}/>
-                      <input type="number" className="inp w-24" placeholder="Costados" value={num(m.mech_sides_mm)} onChange={e=>mut(idx,{mech_sides_mm: toNum(e.target.value)})}/>
+                    <div className="flex flex-wrap gap-2">
+                      <input type="number" className="inp w-24" placeholder="Pinza"
+                             value={num(m.mech_clamp_mm)} onChange={e=>mut(i,{mech_clamp_mm: toNum(e.target.value)})}/>
+                      <input type="number" className="inp w-24" placeholder="Cola"
+                             value={num(m.mech_tail_mm)} onChange={e=>mut(i,{mech_tail_mm: toNum(e.target.value)})}/>
+                      <input type="number" className="inp w-28" placeholder="Costados"
+                             value={num(m.mech_sides_mm)} onChange={e=>mut(i,{mech_sides_mm: toNum(e.target.value)})}/>
                     </div>
                   )}
-                </Td>
-                <Td>
-                  <BracketEditor editable={!!m._edit} value={m.price_brackets ?? []} onChange={v=>mut(idx,{price_brackets:v})}/>
-                </Td>
-                <Td className="whitespace-nowrap">
-                  {!m._edit ? (
-                    <div className="flex gap-2">
-                      <button className="btn-ghost" title="Editar" onClick={()=>startEdit(idx)}><Pencil size={16} /></button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <button className="btn-ghost" title="Cancelar cambios" onClick={()=>cancelEdit(idx)}><RotateCcw size={16} /></button>
-                      <button className="btn-ok" title="Guardar edición" onClick={()=>saveEdit(idx)}><Upload size={16} /></button>
-                      <button className="btn-danger" title="Eliminar" onClick={()=>deleteMachine(m.id, idx)}><Trash2 size={16} /></button>
-                    </div>
+                </Labeled>
+              </div>
+
+              {/* Columna derecha – Tramos */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/80 font-semibold">Costos por formato</span>
+                  {m._edit && (
+                    <button className="btn-ok flex items-center gap-1" onClick={()=>{
+                      const curr = m.price_brackets ?? [];
+                      const next: Bracket = { name:"nuevo", constraints:{maxLen:0,maxWid:0}, sheetCost:{unit:"per_sheet", value:0, currency:"UYU"}, notes:"", _edit:true };
+                      mut(i,{ price_brackets: [next, ...curr] });
+                    }}>
+                      <Plus size={16}/> Tramo
+                    </button>
                   )}
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
 
-      <style jsx>{`
-        /* Alto contraste */
-        .inp { background:#fff; color:#000; border:1px solid #111; padding:.45rem .6rem; border-radius:.5rem; }
-        .inp:disabled { opacity:.7; cursor:not-allowed; }
-        .btn-ghost { padding:.35rem .5rem; border:1px solid rgba(255,255,255,.3); border-radius:.5rem; background:transparent; }
-        .btn-danger { padding:.35rem .5rem; border:1px solid #dc2626; background:#fee2e2; color:#991b1b; border-radius:.5rem; }
-        .btn-ok { padding:.35rem .5rem; border:1px solid #16a34a; background:#dcfce7; color:#14532d; border-radius:.5rem; }
-        .chip { background:#fff; color:#000; border:1px solid #111; border-radius:.5rem; padding:.2rem .5rem; display:inline-block; }
-      `}</style>
-    </div>
-  );
-}
+                {(m.price_brackets ?? []).length===0 && (
+                  <div className="text-xs text-white/60">Sin tramos</div>
+                )}
 
-function Th({children, className}:{children?:any; className?:string}){ return <th className={`text-left font-semibold p-3 ${className||""}`}>{children ?? <>&nbsp;</>}</th>; }
-function Td({children, className, colSpan}:{children?:any; className?:string; colSpan?:number}){ return <td className={`p-3 align-top ${className||""}`} colSpan={colSpan}>{children}</td>; }
-function num(v:any){ return (v ?? "") as any; }
-function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
-
-/** Tramos / formatos */
-function BracketEditor({ editable, value, onChange }:{ editable:boolean; value: Bracket[]; onChange:(v:Bracket[])=>void }) {
-  const list = value ?? [];
-  function add(){ onChange([{ name:"nuevo", constraints:{maxLen:0,maxWid:0}, sheetCost:{unit:"per_sheet", value:0, currency:"UYU"}, notes:"" }, ...list]); }
-  function mut(i:number, patch:Partial<Bracket>){ onChange(list.map((x,ix)=> ix===i ? ({...x, ...patch}) : x)); }
-  function rm(i:number){ onChange(list.filter((_,ix)=> ix!==i)); }
-
-  if (!editable) {
-    return (
-      <div className="space-y-1">
-        {list.length===0 && <div className="text-white/60 text-xs">Sin tramos</div>}
-        {list.map((b, i)=> (
-          <div key={i} className="bg-white text-black border border-black/60 rounded-md px-2 py-1 flex flex-wrap items-center gap-2">
-            <span className="font-medium">{b.name}</span>
-            <span>{b.constraints?.maxLen ?? "-"}{b.constraints?.maxWid ?? "-"} mm</span>
-            <span> {b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}</span>
-            <span> {b.sheetCost?.value ?? "-"}</span>
-            {b.notes ? <span> {b.notes}</span> : null}
+                <div className="space-y-2">
+                  {(m.price_brackets ?? []).map((b, bi)=> (
+                    <div key={bi} className="rounded-lg border border-black/60 bg-white text-black p-2">
+                      {!m._edit ? (
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <span className="font-medium">{b.name}</span>
+                          <span>{b.constraints?.maxLen ?? "-"}×{b.constraints?.maxWid ?? "-"} mm</span>
+                          <span>· {b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}</span>
+                          <span>· {b.sheetCost?.value ?? "-"}</span>
+                          {b.notes ? <span>· {b.notes}</span> : null}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-6 gap-2 items-center">
+                            <input className="inp" value={b.name} onChange={e=>updateBracket(i, bi, {name:e.target.value, b})} placeholder="Nombre"/>
+                            <input className="inp w-24" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>updateBracket(i, bi, {constraints:{...b.constraints, maxLen: toNum(e.target.value) as any}, b})} placeholder="Entrada L"/>
+                            <input className="inp w-24" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>updateBracket(i, bi, {constraints:{...b.constraints, maxWid: toNum(e.target.value) as any}, b})} placeholder="W"/>
+                            <select className="inp w-36" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e=>updateBracket(i, bi, {sheetCost:{...(b.sheetCost||{value:0}), unit: e.target.value as any}, b})}>
+                              <option value="per_sheet">Precio por hoja</option>
+                              <option value="per_thousand">Precio por millar</option>
+                            </select>
+                            <input className="inp w-24" type="number" value={b.sheetCost?.value ?? ""} onChange={e=>updateBracket(i, bi, {sheetCost:{...(b.sheetCost||{unit:"per_sheet"}), value: toNum(e.target.value) as any}, b})} placeholder="Valor"/>
+                            <button className="btn-danger justify-self-end" onClick={()=>removeBracket(i, bi)}><Trash2 size={16}/></button>
+                          </div>
+                          <input className="inp w-full mt-2" value={b.notes ?? ""} onChange={e=>updateBracket(i, bi, {notes:e.target.value, b})} placeholder="Notas (opcional)"/>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
-    );
-  }
 
-  return (
-    <div className="space-y-2">
-      <button className="px-2 py-1 rounded bg-white text-black border border-black/60" onClick={add}>+ Tramo</button>
-      {list.map((b, i)=> (
-        <div key={i} className="rounded-lg border border-black/60 bg-white text-black p-2">
-          <div className="grid grid-cols-6 gap-2 items-center">
-            <input className="inp" value={b.name} onChange={e=>mut(i,{name:e.target.value})} placeholder="Nombre del formato"/>
-            <input className="inp w-24" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>mut(i,{constraints:{...b.constraints, maxLen: toNum(e.target.value) as any}})} placeholder="Entrada L"/>
-            <input className="inp w-24" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>mut(i,{constraints:{...b.constraints, maxWid: toNum(e.target.value) as any}})} placeholder="W"/>
-            <select className="inp w-36" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e=>mut(i,{sheetCost:{...(b.sheetCost||{value:0}), unit: e.target.value as any}})}>
-              <option value="per_sheet">Precio por hoja</option>
-              <option value="per_thousand">Precio por millar</option>
-            </select>
-            <input className="inp w-24" type="number" value={b.sheetCost?.value ?? ""} onChange={e=>mut(i,{sheetCost:{...(b.sheetCost||{unit:"per_sheet"}), value: toNum(e.target.value) as any}})} placeholder="Valor"/>
-            <div className="flex gap-2 justify-end">
-              <button className="btn-danger" title="Eliminar" onClick={()=>rm(i)}><Trash2 size={16}/></button>
-            </div>
-          </div>
-          <input className="inp w-full mt-2" value={b.notes ?? ""} onChange={e=>mut(i,{notes:e.target.value})} placeholder="Notas (opcional)"/>
-        </div>
-      ))}
+      <style jsx>{`
+        .inp { background:#fff; color:#000; border:1px solid #111; padding:.5rem .65rem; border-radius:.6rem; }
+        .inp:disabled { opacity:.75; cursor:not-allowed; }
+        .btn-ghost { padding:.4rem .55rem; border:1px solid rgba(255,255,255,.35); border-radius:.6rem; background:transparent; }
+        .btn-danger { padding:.4rem .55rem; border:1px solid #dc2626; background:#fee2e2; color:#991b1b; border-radius:.6rem; }
+        .btn-ok { padding:.4rem .55rem; border:1px solid #16a34a; background:#dcfce7; color:#14532d; border-radius:.6rem; }
+        .chip { background:#fff; color:#000; border:1px solid #111; border-radius:.6rem; padding:.2rem .6rem; display:inline-block; }
+      `}</style>
     </div>
   );
+
+  function updateBracket(mi:number, bi:number, patch:{b:Bracket} & Partial<Bracket>) {
+    const curr = items[mi].price_brackets ?? [];
+    const next = curr.map((x,idx)=> idx===bi ? ({...(patch.b), ...patch}) as Bracket : x);
+    mut(mi, { price_brackets: next });
+  }
+  function removeBracket(mi:number, bi:number) {
+    const curr = items[mi].price_brackets ?? [];
+    const next = curr.filter((_,idx)=> idx!==bi);
+    mut(mi, { price_brackets: next });
+  }
 }
+
+function Labeled({label, children}:{label:string; children:any}) {
+  return (
+    <label className="grid gap-1 text-sm">
+      <span className="text-white/80">{label}</span>
+      {children}
+    </label>
+  );
+}
+function num(v:any){ return (v ?? "") as any; }
+function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
