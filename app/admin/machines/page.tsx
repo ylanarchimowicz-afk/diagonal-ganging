@@ -4,25 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
 
 type Bracket = {
-  name: string;
-  constraints: { maxLen: number; maxWid: number };
+  constraints: { maxLen: number; maxWid: number }; // maxLen = Ancho (entrada), maxWid = Largo
   sheetCost: { unit: "per_sheet" | "per_thousand"; value: number; currency?: string };
-  notes?: string;
-  _edit?: boolean;
 };
 type Machine = {
   id?: string;
   name: string;
   is_offset?: boolean;
   max_len_mm?: number|null; max_wid_mm?: number|null;
-  min_len_mm?: number|null; min_wid_mm?: number|null;
   mech_clamp_mm?: number|null; mech_tail_mm?: number|null; mech_sides_mm?: number|null;
   base_setup_uyu?: number|null; base_wash_uyu?: number|null;
   base_setup_usd?: number|null; base_wash_usd?: number|null;
-  // estos dos quizás no existen en DB; no se envían al guardar
-  min_impressions?: number|null;
-  feed_long_edge?: boolean;
   price_brackets?: Bracket[];
+  // edición local
   _edit?: boolean;
   _snapshot?: Machine;
 };
@@ -59,51 +53,34 @@ export default function MachinesAdmin() {
       is_offset:false, max_len_mm:null, max_wid_mm:null,
       mech_clamp_mm:0, mech_tail_mm:0, mech_sides_mm:0,
       base_setup_uyu:null, base_wash_uyu:null,
-      min_impressions:null, feed_long_edge:true,
       price_brackets:[], _edit:true
     }, ...p]); setDirty(true);
   }
-
-  function startEdit(i:number){
-    setItems(p=> p.map((x,ix)=> ix===i ? ({...x, _edit:true, _snapshot: structuredClone(x)}) : x));
-  }
+  function startEdit(i:number){ setItems(p=> p.map((x,ix)=> ix===i ? ({...x, _edit:true, _snapshot: structuredClone(x)}) : x)); }
   function cancelEdit(i:number){
     setItems(p=> p.map((x,ix)=> ix===i ? (x._snapshot ? ({...x._snapshot, _edit:false, _snapshot:undefined}) : ({...x, _edit:false})) : x));
   }
-  function saveEdit(i:number){
-    setItems(p=> p.map((x,ix)=> ix===i ? ({...x, _edit:false, _snapshot:undefined}) : x));
-    setDirty(true);
-  }
+  function saveEdit(i:number){ setItems(p=> p.map((x,ix)=> ix===i ? ({...x, _edit:false, _snapshot:undefined}) : x)); setDirty(true); }
   async function deleteMachine(id?: string, idx?: number){
     if (!confirm("¿Eliminar máquina?")) return;
     if (id) await fetch(`/api/admin/machines?id=${id}`, { method:"DELETE" });
     if (typeof idx === "number") setItems(p=> p.filter((_,i)=> i!==idx));
     setDirty(true);
   }
-
   async function saveAll(){
     setMsg("Guardando...");
-    // no enviar campos que tal vez no existan en DB
-    const payload = items.map(({_edit,_snapshot, min_impressions, feed_long_edge, ...rest})=> rest);
+    const payload = items.map(({_edit,_snapshot, ...rest})=> rest);
     const r = await fetch("/api/admin/machines", { method:"PUT", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ items: payload }) });
     const j = await r.json();
-    if (r.ok) {
-      setItems((j.items ?? []).map((m:Machine)=> ({...m, _edit:false, _snapshot:undefined})));
-      setDirty(false); setMsg(`Guardado OK (${j.items?.length ?? 0})`);
-    } else {
-      setMsg("Error: " + (j.error || "desconocido"));
-    }
+    if (r.ok) { setItems((j.items ?? []).map((m:Machine)=> ({...m, _edit:false, _snapshot:undefined}))); setDirty(false); setMsg(`Guardado OK (${j.items?.length ?? 0})`); }
+    else { setMsg("Error: " + (j.error || "desconocido")); }
   }
-
   const exportHref = useMemo(()=> {
     const payload = items.map(({_edit,_snapshot, ...rest})=> rest);
     return URL.createObjectURL(new Blob([JSON.stringify({ machines: payload }, null, 2)], { type:"application/json" }));
   }, [items]);
 
-  function mut(i:number, patch: Partial<Machine>) {
-    setItems(prev => prev.map((x,ix)=> ix===i ? {...x, ...patch} : x));
-    setDirty(true);
-  }
+  function mut(i:number, patch: Partial<Machine>) { setItems(prev => prev.map((x,ix)=> ix===i ? {...x, ...patch} : x)); setDirty(true); }
 
   return (
     <div className="space-y-5">
@@ -125,11 +102,7 @@ export default function MachinesAdmin() {
           <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4">
             {/* header tarjeta */}
             <div className="flex items-center justify-between gap-2">
-              <input
-                className="inp text-lg font-semibold w-full"
-                value={m.name} onChange={e=>mut(i,{name:e.target.value})}
-                placeholder="Nombre de la máquina" disabled={!m._edit}
-              />
+              <input className="inp text-lg font-semibold w-full" value={m.name} onChange={e=>mut(i,{name:e.target.value})} placeholder="Nombre de la máquina" disabled={!m._edit}/>
               {!m._edit ? (
                 <div className="flex gap-2">
                   <button className="btn-ghost" title="Editar" onClick={()=>startEdit(i)}><Pencil size={18}/></button>
@@ -143,65 +116,68 @@ export default function MachinesAdmin() {
               )}
             </div>
 
-            {/* cuerpo tarjeta */}
+            {/* cuerpo */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Columna izquierda */}
+              {/* izquierda */}
               <div className="space-y-3">
                 <Labeled label="Tipo">
-                  <select className="inp" value={m.is_offset ? "offset" : "digital"}
-                          onChange={e=>mut(i,{is_offset: e.target.value==="offset"})} disabled={!m._edit}>
+                  <select className="inp" value={m.is_offset ? "offset" : "digital"} onChange={e=>mut(i,{is_offset: e.target.value==="offset"})} disabled={!m._edit}>
                     <option value="digital">Digital</option>
                     <option value="offset">Offset</option>
                   </select>
                 </Labeled>
 
-                <Labeled label="Máximo papel (Entrada L × W mm)">
-                  <div className="flex items-center gap-2">
-                    <input type="number" className="inp w-28" placeholder="Entrada L"
-                           value={num(m.max_len_mm)} onChange={e=>mut(i,{max_len_mm: toNum(e.target.value)})}
-                           disabled={!m._edit}/>
-                    <span>×</span>
-                    <input type="number" className="inp w-28" placeholder="W"
-                           value={num(m.max_wid_mm)} onChange={e=>mut(i,{max_wid_mm: toNum(e.target.value)})}
-                           disabled={!m._edit}/>
+                <Labeled label="Tamaño máximo de papel">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="grid gap-1">
+                      <span className="text-xs text-white/70">Ancho (entrada a máquina)</span>
+                      <input type="number" className="inp" placeholder="Ancho (entrada)"
+                        value={num(m.max_len_mm)} onChange={e=>mut(i,{max_len_mm: toNum(e.target.value)})}
+                        disabled={!m._edit}/>
+                    </div>
+                    <div className="grid gap-1">
+                      <span className="text-xs text-white/70">Largo</span>
+                      <input type="number" className="inp" placeholder="Largo"
+                        value={num(m.max_wid_mm)} onChange={e=>mut(i,{max_wid_mm: toNum(e.target.value)})}
+                        disabled={!m._edit}/>
+                    </div>
                   </div>
                 </Labeled>
 
-                <Labeled label="Setups (UYU)">
+                <Labeled label="Costos de preparación (UYU)">
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="number" className="inp" placeholder="Arreglo"
-                           value={num(m.base_setup_uyu ?? m.base_setup_usd)}
-                           onChange={e=>mut(i,{base_setup_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
+                    <input type="number" className="inp" placeholder="Postura"
+                      value={num(m.base_setup_uyu ?? m.base_setup_usd)}
+                      onChange={e=>mut(i,{base_setup_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
                     <input type="number" className="inp" placeholder="Lavado"
-                           value={num(m.base_wash_uyu ?? m.base_wash_usd)}
-                           onChange={e=>mut(i,{base_wash_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
+                      value={num(m.base_wash_uyu ?? m.base_wash_usd)}
+                      onChange={e=>mut(i,{base_wash_uyu: toNum(e.target.value)})} disabled={!m._edit}/>
                   </div>
                 </Labeled>
 
                 <Labeled label="Márgenes (mm)">
-                  {!m._edit ? (
-                    <div className="chip">Pinza {m.mech_clamp_mm ?? "-"} · Cola {m.mech_tail_mm ?? "-"} · Costados {m.mech_sides_mm ?? "-"}</div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      <input type="number" className="inp w-24" placeholder="Pinza"
-                             value={num(m.mech_clamp_mm)} onChange={e=>mut(i,{mech_clamp_mm: toNum(e.target.value)})}/>
-                      <input type="number" className="inp w-24" placeholder="Cola"
-                             value={num(m.mech_tail_mm)} onChange={e=>mut(i,{mech_tail_mm: toNum(e.target.value)})}/>
-                      <input type="number" className="inp w-28" placeholder="Costados"
-                             value={num(m.mech_sides_mm)} onChange={e=>mut(i,{mech_sides_mm: toNum(e.target.value)})}/>
-                    </div>
-                  )}
+                  <div className="grid grid-cols-3 gap-2">
+                    <input type="number" className="inp" placeholder="Pinza"
+                      value={num(m.mech_clamp_mm)} onChange={e=>mut(i,{mech_clamp_mm: toNum(e.target.value)})}
+                      disabled={!m._edit}/>
+                    <input type="number" className="inp" placeholder="Cola"
+                      value={num(m.mech_tail_mm)} onChange={e=>mut(i,{mech_tail_mm: toNum(e.target.value)})}
+                      disabled={!m._edit}/>
+                    <input type="number" className="inp" placeholder="Márgenes"
+                      value={num(m.mech_sides_mm)} onChange={e=>mut(i,{mech_sides_mm: toNum(e.target.value)})}
+                      disabled={!m._edit}/>
+                  </div>
                 </Labeled>
               </div>
 
-              {/* Columna derecha – Tramos */}
+              {/* derecha: tramos */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white/80 font-semibold">Costos por formato</span>
                   {m._edit && (
                     <button className="btn-ok flex items-center gap-1" onClick={()=>{
                       const curr = m.price_brackets ?? [];
-                      const next: Bracket = { name:"nuevo", constraints:{maxLen:0,maxWid:0}, sheetCost:{unit:"per_sheet", value:0, currency:"UYU"}, notes:"", _edit:true };
+                      const next: Bracket = { constraints:{maxLen:0,maxWid:0}, sheetCost:{unit:"per_sheet", value:0, currency:"UYU"} };
                       mut(i,{ price_brackets: [next, ...curr] });
                     }}>
                       <Plus size={16}/> Tramo
@@ -209,35 +185,45 @@ export default function MachinesAdmin() {
                   )}
                 </div>
 
-                {(m.price_brackets ?? []).length===0 && (
-                  <div className="text-xs text-white/60">Sin tramos</div>
-                )}
+                {(m.price_brackets ?? []).length===0 && <div className="text-xs text-white/60">Sin tramos</div>}
 
                 <div className="space-y-2">
                   {(m.price_brackets ?? []).map((b, bi)=> (
                     <div key={bi} className="rounded-lg border border-black/60 bg-white text-black p-2">
                       {!m._edit ? (
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <span className="font-medium">{b.name}</span>
-                          <span>{b.constraints?.maxLen ?? "-"}×{b.constraints?.maxWid ?? "-"} mm</span>
-                          <span>· {b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}</span>
-                          <span>· {b.sheetCost?.value ?? "-"}</span>
-                          {b.notes ? <span>· {b.notes}</span> : null}
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>Ancho (entrada): <b>{b.constraints?.maxLen ?? "-"}</b> mm</div>
+                          <div>Largo: <b>{b.constraints?.maxWid ?? "-"}</b> mm</div>
+                          <div>Unidad: <b>{b.sheetCost?.unit==="per_sheet" ? "por hoja" : "por millar"}</b></div>
+                          <div>Precio: <b>{b.sheetCost?.value ?? "-"}</b></div>
                         </div>
                       ) : (
                         <>
-                          <div className="grid grid-cols-6 gap-2 items-center">
-                            <input className="inp" value={b.name} onChange={e=>updateBracket(i, bi, {name:e.target.value, b})} placeholder="Nombre"/>
-                            <input className="inp w-24" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>updateBracket(i, bi, {constraints:{...b.constraints, maxLen: toNum(e.target.value) as any}, b})} placeholder="Entrada L"/>
-                            <input className="inp w-24" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>updateBracket(i, bi, {constraints:{...b.constraints, maxWid: toNum(e.target.value) as any}, b})} placeholder="W"/>
-                            <select className="inp w-36" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e=>updateBracket(i, bi, {sheetCost:{...(b.sheetCost||{value:0}), unit: e.target.value as any}, b})}>
-                              <option value="per_sheet">Precio por hoja</option>
-                              <option value="per_thousand">Precio por millar</option>
-                            </select>
-                            <input className="inp w-24" type="number" value={b.sheetCost?.value ?? ""} onChange={e=>updateBracket(i, bi, {sheetCost:{...(b.sheetCost||{unit:"per_sheet"}), value: toNum(e.target.value) as any}, b})} placeholder="Valor"/>
-                            <button className="btn-danger justify-self-end" onClick={()=>removeBracket(i, bi)}><Trash2 size={16}/></button>
+                          {/* 2 filas x 2 columnas = 4 casillas */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="grid gap-1">
+                              <span className="text-xs">Ancho (entrada)</span>
+                              <input className="inp" type="number" value={b.constraints?.maxLen ?? ""} onChange={e=>updBracket(i, bi, {constraints:{...b.constraints, maxLen: toNum(e.target.value) as any}})} />
+                            </div>
+                            <div className="grid gap-1">
+                              <span className="text-xs">Largo</span>
+                              <input className="inp" type="number" value={b.constraints?.maxWid ?? ""} onChange={e=>updBracket(i, bi, {constraints:{...b.constraints, maxWid: toNum(e.target.value) as any}})} />
+                            </div>
+                            <div className="grid gap-1">
+                              <span className="text-xs">Unidad</span>
+                              <select className="inp" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e=>updBracket(i, bi, {sheetCost:{...(b.sheetCost||{value:0}), unit: e.target.value as any}})}>
+                                <option value="per_sheet">por hoja</option>
+                                <option value="per_thousand">por millar</option>
+                              </select>
+                            </div>
+                            <div className="grid gap-1">
+                              <span className="text-xs">Precio</span>
+                              <input className="inp" type="number" value={b.sheetCost?.value ?? ""} onChange={e=>updBracket(i, bi, {sheetCost:{...(b.sheetCost||{unit:"per_sheet"}), value: toNum(e.target.value) as any}})} />
+                            </div>
                           </div>
-                          <input className="inp w-full mt-2" value={b.notes ?? ""} onChange={e=>updateBracket(i, bi, {notes:e.target.value, b})} placeholder="Notas (opcional)"/>
+                          <div className="flex justify-end mt-2">
+                            <button className="btn-danger" onClick={()=>removeBracket(i, bi)}><Trash2 size={16}/></button>
+                          </div>
                         </>
                       )}
                     </div>
@@ -255,14 +241,18 @@ export default function MachinesAdmin() {
         .btn-ghost { padding:.4rem .55rem; border:1px solid rgba(255,255,255,.35); border-radius:.6rem; background:transparent; }
         .btn-danger { padding:.4rem .55rem; border:1px solid #dc2626; background:#fee2e2; color:#991b1b; border-radius:.6rem; }
         .btn-ok { padding:.4rem .55rem; border:1px solid #16a34a; background:#dcfce7; color:#14532d; border-radius:.6rem; }
-        .chip { background:#fff; color:#000; border:1px solid #111; border-radius:.6rem; padding:.2rem .6rem; display:inline-block; }
       `}</style>
     </div>
   );
 
-  function updateBracket(mi:number, bi:number, patch:{b:Bracket} & Partial<Bracket>) {
+  function num(v:any){ return (v ?? "") as any; }
+  function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
+  function Labeled({label, children}:{label:string; children:any}) {
+    return (<label className="grid gap-1 text-sm"><span className="text-white/80">{label}</span>{children}</label>);
+  }
+  function updBracket(mi:number, bi:number, patch:Partial<Bracket>) {
     const curr = items[mi].price_brackets ?? [];
-    const next = curr.map((x,idx)=> idx===bi ? ({...(patch.b), ...patch}) as Bracket : x);
+    const next = curr.map((x,idx)=> idx===bi ? ({...x, ...patch}) : x);
     mut(mi, { price_brackets: next });
   }
   function removeBracket(mi:number, bi:number) {
@@ -271,14 +261,3 @@ export default function MachinesAdmin() {
     mut(mi, { price_brackets: next });
   }
 }
-
-function Labeled({label, children}:{label:string; children:any}) {
-  return (
-    <label className="grid gap-1 text-sm">
-      <span className="text-white/80">{label}</span>
-      {children}
-    </label>
-  );
-}
-function num(v:any){ return (v ?? "") as any; }
-function toNum(s:string){ const n = Number(s); return Number.isFinite(n) ? n : null; }
