@@ -1,4 +1,4 @@
-﻿/* app/admin/machines/page.tsx  versión estable sin <style jsx>, Tailwind-only */
+﻿/* app/admin/machines/page.tsx  layout fijo con grid de 12 columnas */
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
@@ -19,8 +19,8 @@ type Machine = {
   mech_sides_mm?: number | null; // márgenes laterales
   base_setup_uyu?: number | null; // postura
   base_wash_uyu?: number | null;  // lavado
-  base_setup_usd?: number | null; // compat
-  base_wash_usd?: number | null;  // compat
+  base_setup_usd?: number | null;
+  base_wash_usd?: number | null;
   price_brackets?: Bracket[];
   _edit?: boolean;
   _snapshot?: Machine;
@@ -31,7 +31,6 @@ export default function MachinesAdmin() {
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // Cargar desde API si existe
   useEffect(() => {
     (async () => {
       try {
@@ -44,8 +43,7 @@ export default function MachinesAdmin() {
     })();
   }, []);
 
-  // Utilidades
-  function toNum(s: string) { const n = Number(s); return Number.isFinite(n) ? n : null; }
+  const toNum = (s: string) => { const n = Number(s); return Number.isFinite(n) ? n : null; };
   function mut(i: number, patch: Partial<Machine>) { setItems(p => p.map((x, ix) => ix === i ? ({ ...x, ...patch }) : x)); setDirty(true); }
   function updBracket(mi: number, bi: number, patch: Partial<Bracket>) {
     const curr = items[mi].price_brackets ?? [];
@@ -57,7 +55,6 @@ export default function MachinesAdmin() {
     mut(mi, { price_brackets: curr.filter((_, idx) => idx !== bi) });
   }
 
-  // CRUD fila
   function addMachine() {
     setItems(p => [{
       name: "Nueva máquina",
@@ -83,24 +80,20 @@ export default function MachinesAdmin() {
     setDirty(true);
   }
 
-  // Guardar todo / Exportar
   async function saveAll() {
     setMsg("Guardando");
     try {
       const payload = items.map(({ _edit, _snapshot, ...r }) => r);
       const r = await fetch("/api/admin/machines", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: payload })
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: payload })
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j?.error || "falló el guardado");
       setItems((j.items ?? payload).map((m: Machine) => ({ ...m, _edit: false, _snapshot: undefined })));
       setDirty(false); setMsg(`Guardado OK (${(j.items ?? payload).length})`);
-    } catch (e: any) {
-      setMsg("No se pudo guardar: " + (e?.message || "error"));
-    }
+    } catch (e: any) { setMsg("No se pudo guardar: " + (e?.message || "error")); }
   }
+
   const exportHref = useMemo(() =>
     URL.createObjectURL(new Blob([JSON.stringify({ machines: items.map(({ _edit, _snapshot, ...r }) => r) }, null, 2)], { type: "application/json" })),
     [items]
@@ -136,19 +129,19 @@ export default function MachinesAdmin() {
             {/* Título + acciones */}
             <div className="flex items-center justify-between gap-2">
               <input
-                className="bg-white text-black border border-black/80 rounded-md px-3 py-2 w-full text-lg font-semibold disabled:opacity-70"
+                className="inp w-full text-lg font-semibold min-w-0"
                 value={m.name} onChange={e => mut(i, { name: e.target.value })}
                 placeholder="Nombre de la máquina" disabled={!m._edit}
               />
               {!m._edit ? (
                 <div className="flex gap-2">
-                  <button className="px-2.5 py-1.5 rounded border border-white/40" title="Editar" onClick={() => startEdit(i)}><Pencil size={18} /></button>
+                  <button className="btn-ghost" title="Editar" onClick={() => startEdit(i)}><Pencil size={18} /></button>
                 </div>
               ) : (
                 <div className="flex gap-2">
-                  <button className="px-2.5 py-1.5 rounded border border-white/40" title="Cancelar" onClick={() => cancelEdit(i)}><RotateCcw size={18} /></button>
-                  <button className="px-2.5 py-1.5 rounded border border-green-600 bg-green-100 text-green-900" title="Guardar" onClick={() => saveEdit(i)}><Upload size={18} /></button>
-                  <button className="px-2.5 py-1.5 rounded border border-red-600 bg-red-100 text-red-900" title="Eliminar" onClick={() => deleteMachine(m.id, i)}><Trash2 size={18} /></button>
+                  <button className="btn-ghost" title="Cancelar" onClick={() => cancelEdit(i)}><RotateCcw size={18} /></button>
+                  <button className="btn-ok" title="Guardar" onClick={() => saveEdit(i)}><Upload size={18} /></button>
+                  <button className="btn-danger" title="Eliminar" onClick={() => deleteMachine(m.id, i)}><Trash2 size={18} /></button>
                 </div>
               )}
             </div>
@@ -160,7 +153,7 @@ export default function MachinesAdmin() {
                 <label className="grid gap-1 text-sm">
                   <span className="text-white/80">Tipo</span>
                   <select
-                    className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                    className="inp"
                     value={m.is_offset ? "offset" : "digital"}
                     onChange={e => mut(i, { is_offset: e.target.value === "offset" })}
                     disabled={!m._edit}
@@ -170,67 +163,67 @@ export default function MachinesAdmin() {
                   </select>
                 </label>
 
-                {/* Tamaño máximo: 1 fila, 4 columnas (cada input 1/4) */}
+                {/* Tamaño máximo: 12 cols  3 + 3 + 6 */}
                 <div className="sm:col-span-2">
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Tamaño máximo de papel</span>
-                    <div className="grid grid-cols-4 gap-2">
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Ancho (entrada a máquina)</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                    <div className="grid grid-cols-12 gap-2 items-end">
+                      <div className="col-span-3 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a máquina)</span>
+                        <input type="number" className="inp w-full"
                           value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Largo</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                      <div className="col-span-3 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Largo</span>
+                        <input type="number" className="inp w-full"
                           value={m.max_wid_mm ?? ""} onChange={e => mut(i, { max_wid_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div /><div />
+                      <div className="col-span-6" />
                     </div>
                   </label>
                 </div>
 
-                {/* Preparación: 1 fila, 4 columnas (cada input 1/4) */}
+                {/* Preparación: 12 cols  3 + 3 + 6 */}
                 <div className="sm:col-span-2">
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Costos de preparación (UYU)</span>
-                    <div className="grid grid-cols-4 gap-2">
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Postura</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                    <div className="grid grid-cols-12 gap-2 items-end">
+                      <div className="col-span-3 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Postura</span>
+                        <input type="number" className="inp w-full"
                           value={(m.base_setup_uyu ?? m.base_setup_usd) ?? ""} onChange={e => mut(i, { base_setup_uyu: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Lavado</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                      <div className="col-span-3 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Lavado</span>
+                        <input type="number" className="inp w-full"
                           value={(m.base_wash_uyu ?? m.base_wash_usd) ?? ""} onChange={e => mut(i, { base_wash_uyu: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div /><div />
+                      <div className="col-span-6" />
                     </div>
                   </label>
                 </div>
 
-                {/* Márgenes: 1 fila, 6 columnas (cada input 1/6) */}
+                {/* Márgenes: 12 cols  2 + 2 + 2 + 6 */}
                 <div className="sm:col-span-2">
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Márgenes (mm)</span>
-                    <div className="grid grid-cols-6 gap-2">
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Pinza</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                    <div className="grid grid-cols-12 gap-2 items-end">
+                      <div className="col-span-2 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Pinza</span>
+                        <input type="number" className="inp w-full"
                           value={m.mech_clamp_mm ?? ""} onChange={e => mut(i, { mech_clamp_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Cola</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                      <div className="col-span-2 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Cola</span>
+                        <input type="number" className="inp w-full"
                           value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="grid gap-1">
-                        <span className="text-xs text-white/70">Márgenes</span>
-                        <input type="number" className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                      <div className="col-span-2 min-w-0">
+                        <span className="text-xs text-white/70 whitespace-nowrap">Márgenes</span>
+                        <input type="number" className="inp w-full"
                           value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div /><div /><div />
+                      <div className="col-span-6" />
                     </div>
                   </label>
                 </div>
@@ -242,7 +235,7 @@ export default function MachinesAdmin() {
                   <span className="text-sm text-white/80 font-semibold">Costos por formato</span>
                   {m._edit && (
                     <button
-                      className="px-2 py-1 rounded border border-green-600 bg-green-100 text-green-900 flex items-center gap-1"
+                      className="btn-ok flex items-center gap-1"
                       onClick={() => {
                         const curr = m.price_brackets ?? [];
                         const next: Bracket = { constraints: { maxLen: 0, maxWid: 0 }, sheetCost: { unit: "per_sheet", value: 0, currency: "UYU" } };
@@ -266,19 +259,19 @@ export default function MachinesAdmin() {
                           <div className="grid grid-cols-2 gap-2">
                             <label className="grid gap-1 text-xs">
                               <span>Ancho (entrada)</span>
-                              <input className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                              <input className="inp"
                                      type="number" value={b.constraints?.maxLen ?? ""}
                                      onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxWid: 0 }), maxLen: Number(e.target.value || 0) } })} />
                             </label>
                             <label className="grid gap-1 text-xs">
                               <span>Largo</span>
-                              <input className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                              <input className="inp"
                                      type="number" value={b.constraints?.maxWid ?? ""}
                                      onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxLen: 0 }), maxWid: Number(e.target.value || 0) } })} />
                             </label>
                             <label className="grid gap-1 text-xs">
                               <span>Unidad</span>
-                              <select className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                              <select className="inp"
                                       value={b.sheetCost?.unit ?? "per_sheet"}
                                       onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { value: 0 }), unit: e.target.value as any } })}>
                                 <option value="per_sheet">por hoja</option>
@@ -287,14 +280,13 @@ export default function MachinesAdmin() {
                             </label>
                             <label className="grid gap-1 text-xs">
                               <span>Precio</span>
-                              <input className="bg-white text-black border border-black/80 rounded-md px-3 py-2"
+                              <input className="inp"
                                      type="number" value={b.sheetCost?.value ?? ""}
                                      onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { unit: "per_sheet" }), value: Number(e.target.value || 0) } })} />
                             </label>
                           </div>
                           <div className="flex justify-end mt-2">
-                            <button className="px-2 py-1 rounded border border-red-600 bg-red-100 text-red-900"
-                              onClick={() => removeBracket(i, bi)}><Trash2 size={16}/></button>
+                            <button className="btn-danger" onClick={() => removeBracket(i, bi)}><Trash2 size={16}/></button>
                           </div>
                         </>
                       )}
