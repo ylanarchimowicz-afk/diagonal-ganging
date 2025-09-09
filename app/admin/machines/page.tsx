@@ -1,4 +1,4 @@
-﻿/* app/admin/machines/page.tsx  layout fijo con grid de 12 columnas */
+﻿/* app/admin/machines/page.tsx  layout con proporciones definitivas */
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, RotateCcw, Upload, Trash2, Plus } from "lucide-react";
@@ -16,7 +16,7 @@ type Machine = {
   max_wid_mm?: number | null;  // largo
   mech_clamp_mm?: number | null; // pinza
   mech_tail_mm?: number | null;  // cola
-  mech_sides_mm?: number | null; // márgenes laterales
+  mech_sides_mm?: number | null; // márgenes
   base_setup_uyu?: number | null; // postura
   base_wash_uyu?: number | null;  // lavado
   base_setup_usd?: number | null;
@@ -103,17 +103,16 @@ export default function MachinesAdmin() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">Máquinas</h1>
-        <input type="file" accept="application/json"
-          onChange={async e => {
-            const f = e.target.files?.[0]; if (!f) return;
-            try {
-              const raw = JSON.parse(await f.text());
-              const arr: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines) ? raw.machines : (Array.isArray(raw?.items) ? raw.items : []));
-              const list: Machine[] = arr.map((m: any) => ({ ...m, price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : [], _edit: false }));
-              setItems(list); setDirty(true);
-            } catch { alert("JSON inválido"); }
-            e.currentTarget.value = "";
-          }} />
+        <input type="file" accept="application/json" onChange={async e => {
+          const f = e.target.files?.[0]; if (!f) return;
+          try {
+            const raw = JSON.parse(await f.text());
+            const arr: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines) ? raw.machines : (Array.isArray(raw?.items) ? raw.items : []));
+            const list: Machine[] = arr.map((m: any) => ({ ...m, price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : [], _edit: false }));
+            setItems(list); setDirty(true);
+          } catch { alert("JSON inválido"); }
+          e.currentTarget.value = "";
+        }} />
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addMachine}>Agregar</button>
         <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
         <a href={exportHref} download="machines.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
@@ -148,8 +147,8 @@ export default function MachinesAdmin() {
 
             {/* Cuerpo: izquierda datos / derecha tramos */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Izquierda */}
-              <div className="space-y-3">
+              {/* Izquierda (50% del card) */}
+              <div className="space-y-4">
                 <label className="grid gap-1 text-sm">
                   <span className="text-white/80">Tipo</span>
                   <select
@@ -163,67 +162,64 @@ export default function MachinesAdmin() {
                   </select>
                 </label>
 
-                {/* Tamaño máximo: 12 cols  3 + 3 + 6 */}
-                <div className="sm:col-span-2">
+                {/* Tamaño máximo: dentro de la columna izquierda (12 cols)  cada input col-span-6 */}
+                <div>
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Tamaño máximo de papel</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-3 min-w-0">
+                      <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Ancho (entrada a máquina)</span>
                         <input type="number" className="inp w-full"
                           value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-3 min-w-0">
+                      <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Largo</span>
                         <input type="number" className="inp w-full"
                           value={m.max_wid_mm ?? ""} onChange={e => mut(i, { max_wid_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-6" />
                     </div>
                   </label>
                 </div>
 
-                {/* Preparación: 12 cols  3 + 3 + 6 */}
-                <div className="sm:col-span-2">
+                {/* Preparación: cada input col-span-6 (mitad de la columna izquierda) */}
+                <div>
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Costos de preparación (UYU)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-3 min-w-0">
+                      <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Postura</span>
                         <input type="number" className="inp w-full"
                           value={(m.base_setup_uyu ?? m.base_setup_usd) ?? ""} onChange={e => mut(i, { base_setup_uyu: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-3 min-w-0">
+                      <div className="col-span-6 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Lavado</span>
                         <input type="number" className="inp w-full"
                           value={(m.base_wash_uyu ?? m.base_wash_usd) ?? ""} onChange={e => mut(i, { base_wash_uyu: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-6" />
                     </div>
                   </label>
                 </div>
 
-                {/* Márgenes: 12 cols  2 + 2 + 2 + 6 */}
-                <div className="sm:col-span-2">
+                {/* Márgenes: tres inputs  col-span-4 cada uno (un tercio de la columna izquierda) */}
+                <div>
                   <label className="grid gap-2 text-sm">
                     <span className="text-white/80">Márgenes (mm)</span>
                     <div className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-2 min-w-0">
+                      <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Pinza</span>
                         <input type="number" className="inp w-full"
                           value={m.mech_clamp_mm ?? ""} onChange={e => mut(i, { mech_clamp_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-2 min-w-0">
+                      <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Cola</span>
                         <input type="number" className="inp w-full"
                           value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-2 min-w-0">
+                      <div className="col-span-4 min-w-0">
                         <span className="text-xs text-white/70 whitespace-nowrap">Márgenes</span>
                         <input type="number" className="inp w-full"
                           value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
                       </div>
-                      <div className="col-span-6" />
                     </div>
                   </label>
                 </div>
