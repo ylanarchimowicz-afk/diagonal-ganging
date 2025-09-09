@@ -20,8 +20,8 @@ function Dropzone({ onFiles }:{ onFiles:(f:File[])=>void }) {
     <label className="block rounded-2xl border border-dashed border-white/20 hover:border-white/40 p-8 text-center cursor-pointer">
       <input type="file" multiple accept="application/pdf" className="hidden"
              onChange={e=>onFiles(Array.from(e.target.files||[]))}/>
-      <div className="text-white/80">Arrastrá PDFs acá o hacé click</div>
-      <div className="text-white/50 text-sm mt-1">Previews y confirmación en el paso siguiente</div>
+      <div className="text-white/80">Arrastra PDFs aqui o haz click</div>
+      <div className="text-white/50 text-sm mt-1">Previews y confirmacion en el siguiente paso</div>
     </label>
   );
 }
@@ -33,20 +33,32 @@ export default function NewJob() {
   const [log, setLog] = useState<string>("");
 
   async function createAndAnalyze() {
-    setLoading(true); setLog("Creando job…");
-    const res = await fetch("/api/jobs", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ mode }) });
-    const data = await res.json(); const id = data.id || "job_xxx";
-    setLog(\Job \ creado. (Demo) Subiendo PDFs y disparando Analyze…\);
+    try {
+      setLoading(true);
+      setLog("Creando job...");
+      const res = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode })
+      });
+      const data = await res.json();
+      const id = data.id || "job_xxx";
+      setLog(`Job ${id} creado. Subiendo PDFs y disparando Analyze...`);
 
-    // TODO: upload real → aquí solo simulamos el flujo:
-    await fetch(\/api/jobs/\/analyze\, { method:"POST" });
-    setLog("Analyze encolado. Ahora Confirm → Plan → Impose en próximos pasos.");
-    setLoading(false);
-    alert("Listo. (Demo) Job creado y analyze encolado.");
+      // DEMO: solo simulamos el flujo
+      await fetch(`/api/jobs/${id}/analyze`, { method: "POST" });
+      setLog("Analyze encolado. Luego: Confirm -> Plan -> Impose.");
+      alert("Listo. (Demo) Job creado y analyze encolado.");
+    } catch (e) {
+      console.error(e);
+      alert("Error creando el job.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function calcManual() {
-    alert("Demo: con BE listo, hace POST /api/jobs → /plan → /impose");
+    alert("Demo: con backend listo, hace POST /api/jobs -> /plan -> /impose");
   }
 
   return (
@@ -84,10 +96,10 @@ export default function NewJob() {
         ) : (
           <section className="space-y-3">
             <Row label="Tamaño (mm)">
-              <input placeholder="ancho" className="inp"/> <span>×</span> <input placeholder="alto" className="inp"/>
+              <input placeholder="ancho" className="inp"/> <span>x</span> <input placeholder="alto" className="inp"/>
             </Row>
             <Row label="Tintas"><select className="inp"><option>CMYK</option><option>B&N</option><option>Spot</option></select></Row>
-            <Row label="Doble faz"><select className="inp"><option>No</option><option>Sí</option></select></Row>
+            <Row label="Doble faz"><select className="inp"><option>No</option><option>Si</option></select></Row>
             <Row label="Cantidad"><input placeholder="1000" className="inp"/></Row>
             <button className="px-4 py-2 rounded-lg bg-white text-black font-semibold" onClick={calcManual}>Calcular</button>
           </section>
@@ -97,13 +109,13 @@ export default function NewJob() {
       <aside className="space-y-4">
         <div className="rounded-2xl bg-[#111317] p-5 border border-white/10">
           <h4 className="font-semibold mb-2">Tip</h4>
-          <p className="text-sm text-white/70">En “Auto” detectamos tamaño, B&N/CMYK/Spot y bleed. Después confirmás y listo.</p>
+          <p className="text-sm text-white/70">En Auto detectamos tamaño, BN/CMYK/Spot y bleed. Despues confirmas y listo.</p>
         </div>
       </aside>
 
-      <style jsx>{
+      <style jsx>{`
         .inp { background:#0f1115; border:1px solid rgba(255,255,255,.12); padding:.5rem .6rem; border-radius:.6rem; }
-      }</style>
+      `}</style>
     </div>
   );
 }
