@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { normalizeExternalMaterials, looksLikeExternalMaterials } from "@/app/lib/materials-normalize";
 import { useEffect, useMemo, useState } from "react";
 
@@ -59,7 +59,7 @@ export default function MaterialsPage(){
   function cancelEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? (t._snapshot ? {...t._snapshot, _edit:false, _snapshot:undefined} : {...t, _edit:false}) : t)); }
   function saveEdit(ix:number){ setItems(p=>p.map((t,i)=> i===ix ? ({...t, _edit:false, _snapshot:undefined}) : t)); }
   function rmType(ix:number){
-    if(!confirm("¿Eliminar este tipo de papel y todos sus gramajes?")) return;
+    if(!confirm("Â¿Eliminar este tipo de papel y todos sus gramajes?")) return;
     setItems(p=>p.filter((_,i)=>i!==ix)); setDirty(true);
   }
 
@@ -68,7 +68,7 @@ export default function MaterialsPage(){
     try{
       const payload = { items: items.map(({_edit,_snapshot, ...t})=>t) };
       const r = await fetch("/api/admin/materials", { method:"PUT", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
-      if (!r.ok){ const j = await r.json().catch(()=>null); throw new Error(j?.error || "falló el guardado"); }
+      if (!r.ok){ const j = await r.json().catch(()=>null); throw new Error(j?.error || "fallÃ³ el guardado"); }
       setDirty(false); setMsg("Guardado OK");
     }catch(e:any){ setMsg("No se pudo guardar: "+(e?.message||"error")); }
   }
@@ -76,8 +76,28 @@ export default function MaterialsPage(){
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
+        <a href="/admin" className="btn btn-ghost gap-2"> Volver</a>
         <h1 className="text-2xl font-bold">Materiales</h1>
-        <input type="file" accept="application/json" onChange={handleImport} />
+        <input type="file" accept="application/json" onChange={ async (e)=>{
+  const f = e.currentTarget.files?.[0];
+  if(!f) return;
+  try{
+    const txt = await f.text();
+    const raw = JSON.parse(txt);
+    let items:any[] = [];
+    if (looksLikeExternalMaterials(raw)) items = normalizeExternalMaterials(raw);
+    else if (Array.isArray(raw?.items)) items = raw.items;
+    else if (Array.isArray(raw)) items = raw;
+    else throw new Error("Estructura no reconocida");
+    // @ts-ignore
+    setItems?.(items);
+    // @ts-ignore
+    setDirty?.(true);
+    // @ts-ignore
+    setMsg?.(`Importados ${items.length} tipos (sin guardar)`);
+  }catch(err:any){ alert("No se pudo importar el JSON: " + (err?.message||"error")); }
+  e.currentTarget.value = "";
+} } />
         <button className="px-3 py-2 rounded bg-white text-black" onClick={addType}>Agregar tipo</button>
         <button className="px-3 py-2 rounded bg-white text-black" onClick={saveAll} disabled={!dirty}>Guardar todo</button>
         <span className="opacity-80">{msg}</span>
@@ -92,11 +112,11 @@ export default function MaterialsPage(){
                 : <h2 className="font-semibold">{t.name}</h2>
               }
               <div className="ml-auto flex gap-2">
-                {!t._edit && <button className="px-2 py-1 border rounded" onClick={()=>startEdit(ix)}>✏️</button>}
+                {!t._edit && <button className="px-2 py-1 border rounded" onClick={()=>startEdit(ix)}>âœï¸</button>}
                 {t._edit && <>
-                  <button className="px-2 py-1 border rounded" onClick={()=>saveEdit(ix)}>⬆️</button>
-                  <button className="px-2 py-1 border rounded" onClick={()=>cancelEdit(ix)}>🔄</button>
-                  <button className="px-2 py-1 border rounded" onClick={()=>rmType(ix)}>🗑️</button>
+                  <button className="px-2 py-1 border rounded" onClick={()=>saveEdit(ix)}>â¬†ï¸</button>
+                  <button className="px-2 py-1 border rounded" onClick={()=>cancelEdit(ix)}>ðŸ”„</button>
+                  <button className="px-2 py-1 border rounded" onClick={()=>rmType(ix)}>ðŸ—‘ï¸</button>
                 </>}
               </div>
             </div>
@@ -107,10 +127,10 @@ export default function MaterialsPage(){
                 <div className="mt-2 space-y-1">
                   {(g.sizes||[]).map((s, sx)=>(
                     <div key={sx} className="text-sm">
-                      {s.w} × {s.l} — {s.supplier||"Proveedor?"} — {s.usdPerTon!=null?`USD/Ton ${s.usdPerTon}`:"USD/Ton?"} {s.preferred?"(preferido)":""}
+                      {s.w} Ã— {s.l} â€” {s.supplier||"Proveedor?"} â€” {s.usdPerTon!=null?`USD/Ton ${s.usdPerTon}`:"USD/Ton?"} {s.preferred?"(preferido)":""}
                     </div>
                   ))}
-                  {(!g.sizes || g.sizes.length===0) && <div className="text-sm opacity-70">Sin tamaños cargados.</div>}
+                  {(!g.sizes || g.sizes.length===0) && <div className="text-sm opacity-70">Sin tamaÃ±os cargados.</div>}
                 </div>
               </div>
             ))}
@@ -120,3 +140,5 @@ export default function MaterialsPage(){
     </div>
   );
 }
+
+
