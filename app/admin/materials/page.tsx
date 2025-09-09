@@ -85,7 +85,7 @@ export default function MaterialsAdmin(){
       // @ts-ignore
       setDirty?.(true);
       // @ts-ignore
-      setMsg?.(Importados \ tipos (sin guardar));
+      setMsg?.(`Importados ${items.length} tipos (sin guardar)`);
     } catch(err:any){
       alert("No se pudo importar el JSON: " + (err?.message || "error"));
     }
@@ -115,7 +115,7 @@ export default function MaterialsAdmin(){
       // @ts-ignore
       setDirty?.(true);
       // @ts-ignore
-      setMsg?.(\Importados \ tipos (sin guardar)\);
+      setMsg?.(`Importados ${items.length} tipos (sin guardar)`);
     } catch(err:any){
       alert("No se pudo importar el JSON: " + (err?.message || "error"));
     }
@@ -250,7 +250,7 @@ export default function MaterialsAdmin(){
     // @ts-ignore
     setDirty?.(true);
     // @ts-ignore
-    setMsg?.(Importados  tipos (sin guardar));
+      setMsg?.(`Importados ${items.length} tipos (sin guardar)`);
   } catch (err:any) {
     alert("No se pudo importar el JSON: " + (err?.message || "error"));
   }
@@ -334,6 +334,7 @@ export default function MaterialsAdmin(){
 }
 
 /* ==== utilidades de estilo mínimas (re-uso de Tailwind) ==== */
+
 
 
 
