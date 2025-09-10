@@ -9,21 +9,40 @@ type Bracket = {
 };
 
 type Machine = {
-  id?: string;
-  name: string;
-  is_offset?: boolean;
-  max_len_mm?: number | null;
-  max_wid_mm?: number | null;
-  mech_clamp_mm?: number | null;
-  mech_tail_mm?: number | null;
-  mech_sides_mm?: number | null;
-  base_setup_uyu?: number | null;
-  base_wash_uyu?: number | null;
-  base_setup_usd?: number | null;
-  base_wash_usd?: number | null;
+  id?: string; name: string; is_offset?: boolean;
+  max_len_mm?: number | null; max_wid_mm?: number | null;
+  mech_clamp_mm?: number | null; mech_tail_mm?: number | null; mech_sides_mm?: number | null;
+  base_setup_uyu?: number | null; base_wash_uyu?: number | null;
   price_brackets?: Bracket[];
-  _edit?: boolean;
-  _snapshot?: Machine;
+  _edit?: boolean; _snapshot?: Machine;
+};
+
+// Componente reutilizable para campos editables estilo Odoo
+const EditableField = ({ isEditing, value, onChange, placeholder, type = "text", options }: any) => {
+  const commonClasses = "w-full bg-transparent px-2 py-1.5 rounded-md transition-colors";
+  if (isEditing) {
+    if (type === 'select') {
+      return (
+        <select value={value} onChange={onChange} className={`${commonClasses} bg-white/10 border border-white/20`}>
+          {options.map((opt:any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+        </select>
+      );
+    }
+    return (
+      <input
+        type={type}
+        value={value ?? ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`${commonClasses} bg-white/10 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/50`}
+      />
+    );
+  }
+  return (
+    <div className={`${commonClasses} hover:bg-white/5 cursor-pointer min-h-[40px] flex items-center`}>
+      {value || <span className="text-white/40">{placeholder}</span>}
+    </div>
+  );
 };
 
 export default function MachinesAdmin() {
@@ -56,25 +75,21 @@ export default function MachinesAdmin() {
   }
 
   function addMachine() {
-    setItems(p => [{
-      name: "Nueva máquina",
-      is_offset: false,
-      max_len_mm: null, max_wid_mm: null,
-      mech_clamp_mm: 0, mech_tail_mm: 0, mech_sides_mm: 0,
-      base_setup_uyu: null, base_wash_uyu: null,
-      price_brackets: [],
-      _edit: true
-    }, ...p]);
+    setItems(p => [{ name: "Nueva Máquina", is_offset: false, _edit: true }, ...p]);
     setDirty(true);
   }
   function startEdit(i: number) { mut(i, { _edit: true, _snapshot: structuredClone(items[i]) }); }
   function cancelEdit(i: number) {
     const snap = items[i]._snapshot;
-    setItems(p => p.map((x, ix) => ix === i ? (snap ? { ...snap, _edit: false, _snapshot: undefined } : { ...x, _edit: false }) : x));
+    if (!snap?.id) { // Si es una máquina nueva que no se guardó, se elimina
+      setItems(p => p.filter((_, ix) => ix !== i));
+      return;
+    }
+    setItems(p => p.map((x, ix) => ix === i ? { ...snap, _edit: false, _snapshot: undefined } : x));
   }
   function saveEdit(i: number) { mut(i, { _edit: false, _snapshot: undefined }); }
   async function deleteMachine(id?: string, idx?: number) {
-    if (!confirm("¿Eliminar máquina?")) return;
+    if (!confirm("¿Eliminar máquina permanentemente?")) return;
     try { if (id) await fetch(`/api/admin/machines?id=${id}`, { method: "DELETE" }); } catch {}
     setItems(p => p.filter((_, i) => i !== (idx ?? -1)));
     setDirty(true);
@@ -88,7 +103,7 @@ export default function MachinesAdmin() {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: payload })
       });
       const j = await r.json();
-      if (!r.ok) throw new Error(j?.error || "falló el guardado");
+      if (!r.ok) throw new Error(j?.error || "Falló el guardado");
       setItems((j.items ?? payload).map((m: Machine) => ({ ...m, _edit: false, _snapshot: undefined })));
       setDirty(false); setMsg(`Guardado OK (${(j.items ?? payload).length})`);
     } catch (e: any) { setMsg("No se pudo guardar: " + (e?.message || "error")); }
@@ -99,14 +114,14 @@ export default function MachinesAdmin() {
     [items]
   );
   
-  const LabeledInput = ({label, sublabel, children} : {label: string, sublabel?: string, children: React.ReactNode}) => (
-    <label className="grid gap-1 text-sm">
+  const LabeledField = ({label, sublabel, children} : {label: string, sublabel?: string, children: React.ReactNode}) => (
+    <div className="flex flex-col gap-1">
       <div className="flex justify-between items-baseline">
-        <span className="text-white/80 font-medium">{label}</span>
+        <span className="text-sm text-white/80 font-medium">{label}</span>
         {sublabel && <span className="text-xs text-white/50">{sublabel}</span>}
       </div>
       {children}
-    </label>
+    </div>
   );
 
   return (
@@ -114,31 +129,21 @@ export default function MachinesAdmin() {
       <header className="flex flex-wrap items-center gap-3">
         <a href="/admin" className="px-3 py-2 rounded bg-white/10 border border-white/20">↩︎ Volver</a>
         <h1 className="text-2xl font-bold">Máquinas</h1>
-        <input type="file" accept="application/json" onChange={async e => {
-          const f = e.currentTarget.files?.[0]; if (!f) return;
-          try {
-            const raw = JSON.parse(await f.text());
-            const arr: any[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.machines) ? raw.machines : (Array.isArray(raw?.items) ? raw.items : []));
-            const list: Machine[] = arr.map((m: any) => ({ ...m, price_brackets: Array.isArray(m.price_brackets) ? m.price_brackets : [], _edit: false }));
-            setItems(list); setDirty(true);
-          } catch { alert("JSON inválido"); }
-          e.currentTarget.value = "";
-        }} />
-        <button className="px-3 py-2 rounded bg-white text-black font-semibold" onClick={addMachine}>Agregar</button>
+        <button className="px-3 py-2 rounded bg-white text-black font-semibold" onClick={addMachine}>Agregar Máquina</button>
         <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50 font-semibold" onClick={saveAll} disabled={!dirty}>Guardar Cambios</button>
-        <a href={exportHref} download="machines.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
-        {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
+        {dirty && <span className="text-amber-300 text-sm animate-pulse">Cambios sin guardar</span>}
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((m, i) => (
           <div key={m.id ?? i} className="rounded-xl border border-white/15 bg-black/40 p-4 flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-2">
-              <input
-                className="inp text-lg font-semibold w-full bg-transparent border-none p-0 disabled:text-white"
-                value={m.name} onChange={e => mut(i, { name: e.target.value })}
-                placeholder="Nombre de la máquina" disabled={!m._edit}
+            <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+              <EditableField
+                isEditing={m._edit}
+                value={m.name}
+                onChange={(e:any) => mut(i, { name: e.target.value })}
+                placeholder="Nombre de la máquina"
               />
               <div className="flex gap-2 items-center">
                 {!m._edit ? (
@@ -146,45 +151,44 @@ export default function MachinesAdmin() {
                 ) : (
                   <>
                     <button className="btn-ghost" title="Cancelar" onClick={() => cancelEdit(i)}><RotateCcw size={18} /></button>
-                    <button className="btn-ok" title="Guardar" onClick={() => saveEdit(i)}><Upload size={18} /></button>
+                    <button className="btn-ok" title="Confirmar" onClick={() => saveEdit(i)}><Upload size={18} /></button>
                     <button className="btn-danger" title="Eliminar" onClick={() => deleteMachine(m.id, i)}><Trash2 size={18} /></button>
                   </>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-              <LabeledInput label="Tipo">
-                <select className="inp w-full" value={m.is_offset ? "offset" : "digital"} onChange={e => mut(i, { is_offset: e.target.value === "offset" })} disabled={!m._edit}>
-                  <option value="digital">Digital</option>
-                  <option value="offset">Offset</option>
-                </select>
-              </LabeledInput>
-              
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+              <LabeledField label="Tipo">
+                 <EditableField
+                    isEditing={m._edit}
+                    type="select"
+                    value={m.is_offset ? "offset" : "digital"}
+                    onChange={(e:any) => mut(i, { is_offset: e.target.value === "offset" })}
+                    options={[{value: "digital", label: "Digital"}, {value: "offset", label: "Offset"}]}
+                  />
+              </LabeledField>
               <div/> 
-
-              <LabeledInput label="Tamaño máximo de papel" sublabel="Ancho (entrada) × Largo">
+              <LabeledField label="Tamaño máximo de papel" sublabel="Ancho (entrada) × Largo">
                 <div className="flex items-center gap-2">
-                  <input type="number" className="inp w-full" value={m.max_len_mm ?? ""} onChange={e => mut(i, { max_len_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                   <span className="text-white/50">×</span>
-                  <input type="number" className="inp w-full" value={m.max_wid_mm ?? ""} onChange={e => mut(i, { max_wid_mm: toNum(e.target.value) })} disabled={!m._edit} />
+                  <EditableField isEditing={m._edit} type="number" value={m.max_len_mm} onChange={(e:any) => mut(i, { max_len_mm: toNum(e.target.value) })} />
+                  <span className="text-white/50">×</span>
+                  <EditableField isEditing={m._edit} type="number" value={m.max_wid_mm} onChange={(e:any) => mut(i, { max_wid_mm: toNum(e.target.value) })} />
                 </div>
-              </LabeledInput>
-
-              <LabeledInput label="Costos de preparación" sublabel="Postura / Lavado (UYU)">
+              </LabeledField>
+              <LabeledField label="Costos de preparación (UYU)" sublabel="Postura / Lavado">
                  <div className="flex items-center gap-2">
-                    <input type="number" className="inp w-full" value={(m.base_setup_uyu ?? m.base_setup_usd) ?? ""} onChange={e => mut(i, { base_setup_uyu: toNum(e.target.value) })} disabled={!m._edit} />
-                    <input type="number" className="inp w-full" value={(m.base_wash_uyu ?? m.base_wash_usd) ?? ""} onChange={e => mut(i, { base_wash_uyu: toNum(e.target.value) })} disabled={!m._edit} />
+                    <EditableField isEditing={m._edit} type="number" value={m.base_setup_uyu} onChange={(e:any) => mut(i, { base_setup_uyu: toNum(e.target.value) })} />
+                    <EditableField isEditing={m._edit} type="number" value={m.base_wash_uyu} onChange={(e:any) => mut(i, { base_wash_uyu: toNum(e.target.value) })} />
                   </div>
-              </LabeledInput>
-
-              <LabeledInput label="Márgenes" sublabel="Pinza / Cola / Costados (mm)">
+              </LabeledField>
+              <LabeledField label="Márgenes (mm)" sublabel="Pinza / Cola / Costados">
                 <div className="flex items-center gap-2">
-                  <input type="number" className="inp w-full" value={m.mech_clamp_mm ?? ""} onChange={e => mut(i, { mech_clamp_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                  <input type="number" className="inp w-full" value={m.mech_tail_mm ?? ""} onChange={e => mut(i, { mech_tail_mm: toNum(e.target.value) })} disabled={!m._edit} />
-                  <input type="number" className="inp w-full" value={m.mech_sides_mm ?? ""} onChange={e => mut(i, { mech_sides_mm: toNum(e.target.value) })} disabled={!m._edit} />
+                  <EditableField isEditing={m._edit} type="number" value={m.mech_clamp_mm} onChange={(e:any) => mut(i, { mech_clamp_mm: toNum(e.target.value) })} />
+                  <EditableField isEditing={m._edit} type="number" value={m.mech_tail_mm} onChange={(e:any) => mut(i, { mech_tail_mm: toNum(e.target.value) })} />
+                  <EditableField isEditing={m._edit} type="number" value={m.mech_sides_mm} onChange={(e:any) => mut(i, { mech_sides_mm: toNum(e.target.value) })} />
                 </div>
-              </LabeledInput>
+              </LabeledField>
             </div>
 
             <div className="space-y-2 border-t border-white/10 pt-3">
@@ -203,35 +207,35 @@ export default function MachinesAdmin() {
 
               <div className="space-y-2">
                 {(m.price_brackets ?? []).map((b, bi) => (
-                  <div key={bi} className={`rounded-lg p-2 ${m._edit ? 'bg-black/20 border border-white/10' : 'bg-white/5'}`}>
+                  <div key={bi} className={`rounded-lg p-2 transition-colors ${m._edit ? 'bg-black/20 border border-white/10' : 'bg-white/5'}`}>
                     {!m._edit ? (
                       <div className="text-sm font-medium text-white/90">
                         {b.constraints?.maxLen ?? "-"}×{b.constraints?.maxWid ?? "-"} mm — ${b.sheetCost?.value ?? "-"} {b.sheetCost?.unit === "per_sheet" ? "por hoja" : "por millar"}
                       </div>
                     ) : (
-                      <>
+                      <div className="space-y-2">
                         <div className="grid grid-cols-2 gap-2">
-                          <LabeledInput label="Ancho (entrada) × Largo">
+                          <LabeledField label="Ancho × Largo">
                             <div className="flex items-center gap-2">
-                                <input className="inp w-full" type="number" value={b.constraints?.maxLen ?? ""} onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxWid: 0 }), maxLen: Number(e.target.value || 0) } })} />
+                                <EditableField isEditing={m._edit} type="number" value={b.constraints?.maxLen} onChange={(e:any) => updBracket(i, bi, { constraints: { ...(b.constraints || { maxWid: 0 }), maxLen: Number(e.target.value || 0) } })} />
                                 <span className="text-white/50">×</span>
-                                <input className="inp w-full" type="number" value={b.constraints?.maxWid ?? ""} onChange={e => updBracket(i, bi, { constraints: { ...(b.constraints || { maxLen: 0 }), maxWid: Number(e.target.value || 0) } })} />
+                                <EditableField isEditing={m._edit} type="number" value={b.constraints?.maxWid} onChange={(e:any) => updBracket(i, bi, { constraints: { ...(b.constraints || { maxLen: 0 }), maxWid: Number(e.target.value || 0) } })} />
                             </div>
-                          </LabeledInput>
-                          <LabeledInput label="Unidad y Precio">
+                          </LabeledField>
+                          <LabeledField label="Unidad y Precio">
                             <div className="flex items-center gap-2">
-                               <select className="inp w-full" value={b.sheetCost?.unit ?? "per_sheet"} onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { value: 0 }), unit: e.target.value as any } })}>
-                                  <option value="per_sheet">por hoja</option>
-                                  <option value="per_thousand">por millar</option>
-                               </select>
-                               <input className="inp w-full" type="number" value={b.sheetCost?.value ?? ""} onChange={e => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { unit: "per_sheet" }), value: toNum(e.target.value) } })} />
+                               <EditableField isEditing={m._edit} type="select" value={b.sheetCost?.unit}
+                                  onChange={(e:any) => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { value: 0 }), unit: e.target.value as any } })}
+                                  options={[{value: "per_sheet", label: "por hoja"}, {value: "per_thousand", label: "por millar"}]}
+                                />
+                               <EditableField isEditing={m._edit} type="number" value={b.sheetCost?.value} onChange={(e:any) => updBracket(i, bi, { sheetCost: { ...(b.sheetCost || { unit: "per_sheet" }), value: toNum(e.target.value) } })} />
                             </div>
-                          </LabeledInput>
+                          </LabeledField>
                         </div>
-                        <div className="flex justify-end mt-2">
+                        <div className="flex justify-end">
                           <button className="btn-danger" onClick={() => removeBracket(i, bi)}><Trash2 size={16}/></button>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 ))}
