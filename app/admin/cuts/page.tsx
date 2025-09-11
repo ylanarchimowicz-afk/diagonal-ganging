@@ -1,17 +1,31 @@
 /* app/admin/cuts/page.tsx */
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Pencil, RotateCcw, Upload } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Upload, ArrowLeft, FileUp } from "lucide-react";
 
-// FIX: Se agrega la propiedad opcional `_edit` al tipo SheetSize
-type SheetSize = { length: number; width: number; preferred?: boolean; _edit?: boolean; };
-type CutGroup = { forPaperSize: { length: number; width: number }, sheetSizes: SheetSize[], _edit?: boolean, _snapshot?: CutGroup };
+type SheetSize = { length: number; width: number; preferred?: boolean };
+type CutGroup = { id?: string, forPaperSize: { length: number; width: number }, sheetSizes: SheetSize[], _dirty?: boolean, _snapshot?: CutGroup };
 
 const toNum = (s:string)=>{ const n = Number(s); return Number.isFinite(n) ? n : 0; };
 
+const EditableField = ({ value, onChange, placeholder, className = "" }: any) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const commonClasses = `w-full bg-transparent px-1 py-0.5 rounded-sm transition-colors text-white/90`;
+  const viewClasses = `border-b border-transparent hover:border-white/30 cursor-pointer`;
+  const editClasses = `border-b border-white/60 focus:border-white focus:outline-none bg-black/30`;
+
+  if (isEditing) {
+    return ( <input type="number" value={value ?? ""} onChange={onChange} onBlur={() => setIsEditing(false)} onKeyDown={(e) => { if(e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLElement).blur() }} placeholder={placeholder} className={`${commonClasses} ${editClasses} ${className}`} autoFocus /> );
+  }
+  return (
+    <div className={`${commonClasses} ${viewClasses} min-h-[32px] flex items-center ${className}`} onClick={() => setIsEditing(true)}>
+      {value || <span className="text-white/40">{placeholder}</span>}
+    </div>
+  );
+};
+
 export default function CutsAdmin(){
   const [groups, setGroups] = useState<CutGroup[]>([]);
-  const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
 
   useEffect(()=>{ (async()=>{
@@ -20,13 +34,17 @@ export default function CutsAdmin(){
       if(!r.ok) return;
       const j = await r.json();
       if (Array.isArray(j?.items)) {
-        setGroups(j.items.map((g:any)=>({...g,_edit:false,_snapshot:undefined, sheetSizes:(g.sheetSizes||[]).map((s:any)=>({...s,_edit:false}))})));
+        setGroups(j.items.map((g:any)=>({...g, _dirty:false, _snapshot:undefined, sheetSizes:(g.sheetSizes||[])})));
       }
     }catch{}
   })(); },[]);
 
   function mut(i:number, patch:Partial<CutGroup>){
-    setGroups(p=>p.map((x,ix)=>ix===i?({...x,...patch}):x)); setDirty(true);
+    setGroups(p=>p.map((x,ix)=>{
+        if(ix !== i) return x;
+        const snapshot = x._snapshot ?? structuredClone(x);
+        return {...x, ...patch, _dirty: true, _snapshot: snapshot};
+    }));
   }
   function mutRow(i:number, ri:number, patch:Partial<SheetSize>){
     const g = groups[i];
@@ -36,143 +54,139 @@ export default function CutsAdmin(){
   }
 
   function addGroup(){
-    setGroups(p=>[
-      { forPaperSize:{length:720,width:1020}, sheetSizes:[], _edit:true },
-      ...p
-    ]);
-    setDirty(true);
+    const newId = `new-${Date.now()}`;
+    setGroups(p=>[{ id: newId, forPaperSize:{length:720,width:1020}, sheetSizes:[], _dirty:true }, ...p]);
   }
-  function delGroup(i:number){
-    if(!confirm("¿Eliminar este grupo de cortes?")) return;
-    setGroups(p=>p.filter((_,ix)=>ix!==i)); setDirty(true);
-  }
-  function startEdit(i:number){ mut(i,{_edit:true,_snapshot:structuredClone(groups[i])}); }
-  function cancelEdit(i:number){
+  
+  function cancelCardChanges(i: number) {
     const snap = groups[i]._snapshot;
-    mut(i, snap? {...snap,_edit:false,_snapshot:undefined}:{_edit:false});
+    if (!snap) { setGroups(p => p.filter((_, ix) => ix !== i)); return; }
+    setGroups(p => p.map((x, ix) => ix === i ? { ...snap, _dirty: false, _snapshot: undefined } : x));
   }
-  function saveEdit(i:number){ mut(i,{_edit:false,_snapshot:undefined}); }
+
+  async function saveCardChanges(i: number) {
+    const groupToSave = groups[i];
+    const { _dirty, _snapshot, ...payload } = groupToSave;
+    setMsg(`Guardando grupo ${payload.forPaperSize.length}×${payload.forPaperSize.width}...`);
+    try {
+      const r = await fetch("/api/admin/cuts", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: [payload] }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j?.error || "Falló guardado");
+      const savedItem = j.items[0];
+      setGroups(p => p.map((x, ix) => ix === i ? { ...savedItem, _dirty: false, _snapshot: undefined } : x));
+      setMsg("Grupo guardado.");
+    } catch (e: any) { setMsg("Error al guardar: " + e.message); }
+  }
+
+  async function deleteGroup(id?: string, idx?: number){
+    if(!confirm("¿Eliminar este grupo de cortes?")) return;
+    try {
+      if (id && !id.startsWith('new-')) {
+        await fetch(`/api/admin/cuts?id=${id}`, { method:"DELETE" });
+      }
+      setGroups(p=>p.filter((_,ix)=>ix!==idx));
+      setMsg("Grupo eliminado.");
+    } catch (e: any) { setMsg("Error al eliminar: " + e.message); }
+  }
 
   function addRow(i:number){
     const g = groups[i];
-    mut(i,{sheetSizes:[{length:g.forPaperSize.length,width:g.forPaperSize.width,preferred:false, _edit: true}, ...(g.sheetSizes||[])]});
+    mut(i,{sheetSizes:[{length:0,width:0,preferred:false}, ...(g.sheetSizes||[])]});
   }
   function delRow(i:number, ri:number){
     const g = groups[i];
     mut(i,{sheetSizes:(g.sheetSizes||[]).filter((_,rx)=>rx!==ri)});
   }
-
-  async function saveAll(){
-    setMsg("Guardando…");
-    try{
-      const payload = groups.map(({_edit,_snapshot, ...g})=>({
-        ...g,
-        sheetSizes:(g.sheetSizes||[]).map(({_edit:__,...s})=>s)
-      }));
-      const r = await fetch("/api/admin/cuts",{method:"PUT",headers:{'Content-Type':'application/json'}, body: JSON.stringify({items:payload})});
-      const j = await r.json().catch(()=>({}));
-      setGroups(payload.map(g=>({...g,_edit:false,_snapshot:undefined, sheetSizes:g.sheetSizes.map(s=>({...s,_edit:false}))})));
-      setDirty(false);
-      setMsg(r.ok? "Guardado OK": "No se pudo guardar en DB (usá Exportar JSON).");
-    }catch(e:any){
-      setMsg("No se pudo guardar en DB (usá Exportar JSON).");
-    }
-  }
-
-  const exportHref = useMemo(()=>{
-    const clean = groups.map(({_edit,_snapshot,...g})=>({
-      ...g,
-      sheetSizes:(g.sheetSizes||[]).map(({_edit:__,...s})=>s)
-    }));
-    return URL.createObjectURL(new Blob([JSON.stringify(clean,null,2)],{type:"application/json"}));
-  },[groups]);
-
+  
   async function onImportFile(e: React.ChangeEvent<HTMLInputElement>){
-      const f = e.currentTarget.files?.[0]; if(!f) return;
+      const input = e.currentTarget;
+      const f = input.files?.[0]; if(!f) return;
       try{
         const arr = JSON.parse(await f.text());
-        const list:CutGroup[] = (Array.isArray(arr)?arr:[]).map((g:any)=>({
+        const newItems:CutGroup[] = (Array.isArray(arr)?arr:[]).map((g:any)=>({
           forPaperSize:{length:Number(g?.forPaperSize?.length)||0, width:Number(g?.forPaperSize?.width)||0},
           sheetSizes:(g?.sheetSizes||[]).map((s:any)=>({length:Number(s?.length)||0, width:Number(s?.width)||0, preferred:!!s?.preferred})),
         }));
-        setGroups(list); setDirty(true);
-      }catch{ alert("JSON inválido"); }
-      e.currentTarget.value="";
+
+        const combinedList = [...groups, ...newItems];
+
+        setMsg("Importando y guardando...");
+        const r = await fetch("/api/admin/cuts", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: combinedList }) });
+        const j = await r.json();
+        if(!r.ok) throw new Error(j.error || "Falló el guardado en la API");
+        
+        setGroups(j.items || []);
+        setMsg(`Importados y guardados ${newItems.length} grupos nuevos. Total: ${j.items.length}.`);
+      }catch(err:any){ 
+        setMsg("Error al importar/guardar: " + err.message);
+        alert("JSON inválido o error al guardar: "+err.message); 
+      }
+      input.value = "";
   }
 
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-center gap-3">
-        <a href="/admin" className="px-3 py-2 rounded bg-white/10 border border-white/20">↩︎ Volver</a>
-        <h1 className="text-2xl font-bold">Cortes</h1>
-        <input type="file" accept="application/json" onChange={onImportFile}/>
-        <button className="px-3 py-2 rounded bg-white text-black" onClick={addGroup}>Agregar grupo</button>
-        <button className="px-3 py-2 rounded bg-white/10 border border-white/20 disabled:opacity-50" onClick={saveAll} disabled={!dirty}>Guardar</button>
-        <a href={exportHref} download="cuts.export.json" className="px-3 py-2 rounded bg-white/10 border border-white/20">Exportar JSON</a>
-        {dirty && <span className="text-amber-300 text-sm">Cambios sin guardar</span>}
+        <a href="/admin" title="Volver" className="p-2 rounded bg-white/10 border border-white/20 hover:bg-white/20 transition-colors">
+            <ArrowLeft size={20}/>
+        </a>
+        <h1 className="text-2xl font-bold mr-auto">Cortes</h1>
+        
         {msg && <span className="text-white/60 text-sm">{msg}</span>}
+        
+        <label title="Importar y Guardar" className="p-2 rounded bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors font-semibold cursor-pointer">
+            <FileUp size={20}/>
+            <input type="file" accept="application/json" onChange={onImportFile} className="hidden"/>
+        </label>
+        <button title="Agregar Grupo" className="p-2 rounded bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors font-semibold" onClick={addGroup}>
+            <Plus size={20}/>
+        </button>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {groups.map((g,gi)=>(
-          <div key={gi} className="rounded-xl border border-white/15 bg-black/40 p-4">
-            <div className="flex items-center justify-between mb-2">
-              {!g._edit ? (
-                <div className="text-lg font-semibold">
-                  Papel {g.forPaperSize.length}×{g.forPaperSize.width} mm
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <input className="inp" type="number" placeholder="L" value={g.forPaperSize.length}
-                         onChange={e=>mut(gi,{forPaperSize:{...g.forPaperSize,length:toNum(e.target.value)||0}})} />
-                  <input className="inp" type="number" placeholder="W" value={g.forPaperSize.width}
-                         onChange={e=>mut(gi,{forPaperSize:{...g.forPaperSize,width:toNum(e.target.value)||0}})} />
-                </div>
-              )}
-              {!g._edit ? (
-                <div className="flex gap-2">
-                  <button className="btn-ghost" title="Editar" onClick={()=>startEdit(gi)}><Pencil size={16}/></button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <button className="btn-ghost" title="Cancelar" onClick={()=>cancelEdit(gi)}><RotateCcw size={16}/></button>
-                  <button className="btn-ok" title="Guardar" onClick={()=>saveEdit(gi)}><Upload size={16}/></button>
-                  <button className="btn-danger" title="Eliminar grupo" onClick={()=>delGroup(gi)}><Trash2 size={16}/></button>
-                </div>
-              )}
+          <div key={g.id ?? gi} className="rounded-xl border border-white/15 bg-black/40 p-4">
+            <div className="flex items-center justify-between gap-2 mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <span>Papel</span>
+                <EditableField value={g.forPaperSize.length} onChange={(e:any)=>mut(gi,{forPaperSize:{...g.forPaperSize,length:toNum(e.target.value)||0}})} />
+                <span>×</span>
+                <EditableField value={g.forPaperSize.width} onChange={(e:any)=>mut(gi,{forPaperSize:{...g.forPaperSize,width:toNum(e.target.value)||0}})} />
+              </div>
+              <div className="flex items-center gap-1.5">
+                {g._dirty && (
+                    <>
+                        <button title="Deshacer" onClick={()=>cancelCardChanges(gi)} className="p-1.5 rounded-md text-white/60 hover:text-white"><RotateCcw size={18}/></button>
+                        <button title="Guardar" onClick={()=>saveCardChanges(gi)} className="p-1.5 rounded-md text-green-400 hover:text-green-300"><Upload size={18}/></button>
+                    </>
+                )}
+                <button title="Eliminar" onClick={()=>deleteGroup(g.id, gi)} className="p-1.5 rounded-md text-red-500 hover:text-red-400"><Trash2 size={18}/></button>
+              </div>
             </div>
-
-            <div className="flex items-center justify-between mt-4">
+            
+            <div className="flex items-center justify-between">
               <span className="text-white/80 font-semibold">Cortes</span>
-              {g._edit && <button className="btn-ok flex items-center gap-1" onClick={()=>addRow(gi)}><Plus size={14}/> Añadir</button>}
+              <button className="p-1.5 rounded-md bg-green-600/30 hover:bg-green-600/50 text-green-300" onClick={()=>addRow(gi)}><Plus size={14}/></button>
             </div>
 
             <div className="mt-2 space-y-2">
               {(g.sheetSizes||[]).map((s,si)=>(
-                <div key={si} className="rounded-lg border border-black/60 bg-white text-black p-2">
-                  {!g._edit ? (
-                    <div className="text-sm">
-                      {s.length}×{s.width} mm {s.preferred ? <span className="text-xs font-semibold text-green-700">(Preferido)</span> : ""}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-12 gap-2 items-center">
-                      <input className="inp col-span-3" type="number" value={s.length} onChange={e=>mutRow(gi,si,{length:toNum(e.target.value)||0})} placeholder="Ancho"/>
-                      <input className="inp col-span-3" type="number" value={s.width}  onChange={e=>mutRow(gi,si,{width:toNum(e.target.value)||0})}  placeholder="Largo"/>
-                      <label
-                        className={`col-span-5 rounded-full px-3 py-1 flex items-center justify-between cursor-pointer border ${s.preferred?'bg-green-600 text-white border-green-700':'bg-gray-200 text-gray-800 border-gray-300'}`}
-                      >
-                        <span className="text-sm font-semibold">{s.preferred?'PREFERIDO':'OFF'}</span>
-                        <input type="checkbox" className="hidden" checked={!!s.preferred} onChange={e=>mutRow(gi,si,{preferred:e.target.checked})} />
-                        <div className={`w-5 h-5 rounded-full transition-colors ${s.preferred ? 'bg-white/50' : 'bg-gray-400'}`}></div>
+                <div key={si} className="relative rounded-lg border border-white/10 bg-black/20 p-2">
+                    <div className="grid grid-cols-12 gap-2 items-center pr-8">
+                      <div className="col-span-3"><EditableField value={s.length} onChange={(e:any)=>mutRow(gi,si,{length:toNum(e.target.value)||0})} placeholder="Ancho"/></div>
+                      <span className="text-white/50 col-span-1 text-center">×</span>
+                      <div className="col-span-3"><EditableField value={s.width}  onChange={(e:any)=>mutRow(gi,si,{width:toNum(e.target.value)||0})}  placeholder="Largo"/></div>
+                      <label className="col-span-5 flex items-center justify-center gap-2 cursor-pointer" onClick={()=>mutRow(gi,si,{preferred:!s.preferred})}>
+                        <span className={`text-xs font-semibold tracking-wider ${s.preferred ? 'text-green-400' : 'text-white/50'}`}>{s.preferred ? 'PREFERIDO' : 'OFF'}</span>
+                        <div className={`relative w-10 h-5 rounded-full transition-colors ${s.preferred ? 'bg-green-600/50' : 'bg-white/20'}`}>
+                            <div className={`absolute top-0.5 left-0.5 h-4 w-4 bg-white rounded-full shadow transform transition-transform ${s.preferred ? 'translate-x-5' : ''}`} />
+                        </div>
                       </label>
-                      <div className="col-span-1 flex justify-end">
-                        <button className="btn-danger" onClick={()=>delRow(gi,si)} title="Borrar"><Trash2 size={16}/></button>
-                      </div>
                     </div>
-                  )}
+                    <button onClick={()=>delRow(gi,si)} title="Borrar" className="absolute top-1/2 -translate-y-1/2 right-1 p-1.5 rounded-md text-red-500/60 hover:text-red-500"><Trash2 size={16}/></button>
                 </div>
               ))}
-              {(g.sheetSizes||[]).length===0 && <div className="text-xs text-black/70 bg-white rounded p-2">Sin cortes</div>}
+              {(g.sheetSizes||[]).length===0 && <div className="text-xs text-center text-white/60 bg-white/5 rounded p-2 mt-2">Sin cortes definidos</div>}
             </div>
           </div>
         ))}
