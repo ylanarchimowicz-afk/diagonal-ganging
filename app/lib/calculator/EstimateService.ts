@@ -22,7 +22,10 @@ export function calculateEstimate(request: EstimateRequest): Estimate {
     for (const technique of techniquesToTest) {
         const materialNeeds = calculateMaterialNeeds(material, sheetSize, netSheetsToPrint, machine, frontInks, backInks, dollarRate);
         const printNeeds = getPrintingNeeds(technique, materialNeeds.printingSheets.totalSheets, frontInks, backInks, samePlatesForBack, machine);
-        const printingPrice = calculatePrintingPrice(machine, printNeeds, material);
+        
+        // **CORRECCIÓN**: Ahora pasamos 'jobDetails' a la función de cálculo de precios.
+        const printingPrice = calculatePrintingPrice(machine, printNeeds, material, netSheetsToPrint, jobDetails);
+        
         const totalCost = materialNeeds.totalMaterialCost + printingPrice.totalPrintingCost;
 
         estimates.push({

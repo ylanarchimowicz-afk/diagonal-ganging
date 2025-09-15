@@ -9,27 +9,32 @@ class SimplexCostCalculator implements CostCalculator {
         return {
             technique: 'SIMPLEX',
             totalPlates: frontInks,
-            printRuns: [{ sheetsToPrint: totalSheets, impressionsPerSheetFront: frontInks, impressionsPerSheetBack: 0 }]
+            printRuns: [{ sheetsToPrint: totalSheets, impressionsPerSheetFront: 1, impressionsPerSheetBack: 0 }]
         };
     }
 }
 
 class DuplexCostCalculator implements CostCalculator {
     calculateNeeds(totalSheets, frontInks, backInks, samePlates, machine): PrintNeeds {
+        // CORRECCIÓN: Se generan dos "print runs", uno por cada postura (frente y dorso)
         return {
             technique: 'DUPLEX',
             totalPlates: frontInks + (samePlates ? 0 : backInks),
-            printRuns: [{ sheetsToPrint: totalSheets, impressionsPerSheetFront: frontInks, impressionsPerSheetBack: backInks }]
+            printRuns: [
+                { sheetsToPrint: totalSheets, impressionsPerSheetFront: 1, impressionsPerSheetBack: 0 }, // Postura Frente
+                { sheetsToPrint: totalSheets, impressionsPerSheetFront: 0, impressionsPerSheetBack: 1 }  // Postura Dorso
+            ]
         };
     }
 }
 
 class WorkAndTurnCostCalculator implements CostCalculator {
     calculateNeeds(totalSheets, frontInks, backInks, samePlates, machine): PrintNeeds {
+        // Se mantiene como una sola postura
         return {
             technique: 'WORK_AND_TURN',
             totalPlates: Math.max(frontInks, backInks),
-            printRuns: [{ sheetsToPrint: totalSheets, impressionsPerSheetFront: Math.max(frontInks, backInks), impressionsPerSheetBack: 0 }]
+            printRuns: [{ sheetsToPrint: totalSheets, impressionsPerSheetFront: 1, impressionsPerSheetBack: 0 }]
         };
     }
 }

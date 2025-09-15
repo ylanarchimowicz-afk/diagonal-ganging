@@ -1,13 +1,14 @@
 import { Machine, Material, MaterialNeeds, Size } from './types';
+import { findBestCut, CuttingPlan } from './packer';
 
-function getUsdPerTonForSize(material: Material, sheetSize: Size): number {
-    const factorySize = material.factorySizes.find(fs => fs.width === sheetSize.width && fs.length === sheetSize.length);
-    return factorySize?.usdPerTon || 0;
+function getUsdPerTonForSize(material: Material, factorySize: Size): number {
+    const sizeInfo = material.factorySizes.find(fs => fs.width === factorySize.width && fs.length === factorySize.length);
+    return sizeInfo?.usdPerTon || 0;
 }
 
 export function calculateMaterialNeeds(
     material: Material,
-    sheetSize: Size,
+    printingSheetSize: Size,
     netSheets: number,
     machine: Machine,
     frontInks: number,
@@ -17,28 +18,48 @@ export function calculateMaterialNeeds(
     // 1. Calcular Merma
     const inkCountForOverage = machine.overage.perInk ? (frontInks + backInks) : 1;
     const overageSheets = machine.overage.amount * inkCountForOverage;
-    const totalSheets = netSheets + overageSheets;
+    const totalPrintingSheets = netSheets + overageSheets;
 
-    // 2. Calcular Hojas de Fábrica (asume que 1 pliego = 1 hoja de fábrica)
-    const factorySheetsNeeded = totalSheets;
-    
+    // 2. Optimización de Corte
+    let bestFactoryOption = {
+        factorySize: null as Size | null,
+        sheetsToCut: Infinity,
+        cuttingPlan: null as CuttingPlan | null,
+    };
+
+    for (const factorySize of material.factorySizes) {
+        const plan = findBestCut(factorySize, printingSheetSize);
+        if (plan.cutsPerSheet > 0) {
+            const factorySheetsNeeded = Math.ceil(totalPrintingSheets / plan.cutsPerSheet);
+            // Elegimos la opción que necesite menos hojas de fábrica
+            if (factorySheetsNeeded < bestFactoryOption.sheetsToCut) {
+                bestFactoryOption = {
+                    factorySize: factorySize,
+                    sheetsToCut: factorySheetsNeeded,
+                    cuttingPlan: plan,
+                };
+            }
+        }
+    }
+
+    if (!bestFactoryOption.factorySize || !bestFactoryOption.cuttingPlan) {
+        throw new Error(`No se encontró un tamaño de fábrica en el material "${material.name}" desde el cual se pueda cortar el pliego de ${printingSheetSize.width}x${printingSheetSize.length}`);
+    }
+
     // 3. Calcular Costo del Material
-    const usdPerTon = getUsdPerTonForSize(material, sheetSize);
-    const sheetAreaM2 = (sheetSize.width / 1000) * (sheetSize.length / 1000);
+    const usdPerTon = getUsdPerTonForSize(material, bestFactoryOption.factorySize);
+    const sheetAreaM2 = (bestFactoryOption.factorySize.width / 1000) * (bestFactoryOption.factorySize.length / 1000);
     const sheetWeightKg = (sheetAreaM2 * material.grammage) / 1000;
-    const costPerSheetUsd = (sheetWeightKg / 1000) * usdPerTon;
-    const totalMaterialCostInLocalCurrency = factorySheetsNeeded * costPerSheetUsd * dollarRate;
+    const costPerFactorySheetUSD = (sheetWeightKg / 1000) * usdPerTon;
+    const totalMaterialCost = bestFactoryOption.sheetsToCut * costPerFactorySheetUSD * dollarRate;
 
     return {
         factorySheets: {
-            size: sheetSize,
-            quantityNeeded: factorySheetsNeeded
+            size: bestFactoryOption.factorySize,
+            quantityNeeded: bestFactoryOption.sheetsToCut,
+            cuttingPlan: bestFactoryOption.cuttingPlan,
         },
-        printingSheets: {
-            netSheets: netSheets,
-            overageSheets: overageSheets,
-            totalSheets: totalSheets
-        },
-        totalMaterialCost: totalMaterialCostInLocalCurrency
+        printingSheets: { netSheets, overageSheets, totalSheets: totalPrintingSheets },
+        totalMaterialCost,
     };
 }
